@@ -46,7 +46,6 @@ const els = {
   auditDetails: document.querySelector("#auditDetails"),
   auditFindings: document.querySelector("#auditFindings"),
   refreshAuditButton: document.querySelector("#refreshAuditButton"),
-  auditTabScore: document.querySelector("#auditTabScore"),
   historyList: document.querySelector("#historyList"),
   restoreButton: document.querySelector("#restoreButton"),
   storageStatus: document.querySelector("#storageStatus"),
@@ -525,8 +524,6 @@ function renderAudit(prompt) {
   els.auditScore.parentElement.className = `score-ring ${audit.level}`;
   els.auditBadge.textContent = audit.level === "low" ? "Clean" : audit.level === "medium" ? "Review" : "Risk";
   els.auditBadge.className = `audit-badge ${audit.level === "low" ? "" : audit.level}`;
-  els.auditTabScore.textContent = audit.score;
-  els.auditTabScore.className = audit.level === "low" ? "" : audit.level;
   renderAuditBreakdown(audit);
   renderAuditDetails(audit);
   els.auditFindings.innerHTML = audit.findings.length

@@ -82,3 +82,6 @@ Removed the narrow audit width, balanced the audit score layout, and grouped pro
 [2026-05-31T14:09:36.402Z] DONE - Refine editor typography hierarchy
 Adjusted font sizes and weights across the editor, overview, tabs, labels, and audit panels so the page structure is clearer with fewer boxed controls.
 
+[2026-05-31T14:14:36.452Z] DONE - Flatten editor and menu controls
+Removed the audit tab icon and score badge, softened Save into a flat action, and removed rounded-box styling from left menu rows.
+

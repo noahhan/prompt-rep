@@ -223,11 +223,12 @@ button {
   gap: 10px;
   width: 100%;
   min-height: 42px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: #fff;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
-  padding: 0 11px;
+  padding: 0 8px 0 10px;
   text-align: left;
   font-size: 13px;
   font-weight: 800;
@@ -236,8 +237,8 @@ button {
 
 .overview-link:hover,
 .overview-link.active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+  border-left-color: var(--accent);
+  background: transparent;
   color: var(--accent-strong);
 }
 
@@ -247,14 +248,14 @@ button {
   min-width: 26px;
   height: 24px;
   margin-left: auto;
-  border-radius: 999px;
-  background: var(--panel-strong);
+  border-radius: 0;
+  background: transparent;
   color: var(--muted);
   font-size: 11px;
 }
 
 .overview-link.active strong {
-  background: #fff;
+  background: transparent;
   color: var(--accent-strong);
 }
 
@@ -337,10 +338,11 @@ button {
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0;
   background: transparent;
-  padding: 9px 10px;
+  padding: 9px 8px 9px 10px;
   color: var(--text);
   text-align: left;
   font-size: 14px;
@@ -392,8 +394,9 @@ button {
 
 .nav-item:hover,
 .nav-item.active {
-  border-color: var(--line);
-  background: #fff;
+  border-left-color: var(--accent);
+  background: transparent;
+  color: var(--accent-strong);
 }
 
 .nav-item span:last-child {
@@ -404,8 +407,8 @@ button {
 .category-children {
   display: grid;
   gap: 4px;
-  margin-left: 34px;
-  padding-left: 10px;
+  margin-left: 31px;
+  padding-left: 12px;
   border-left: 1px solid var(--line);
 }
 
@@ -413,11 +416,11 @@ button {
   display: block;
   width: 100%;
   overflow: hidden;
-  border: 1px solid transparent;
-  border-radius: 7px;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
-  padding: 7px 9px;
+  padding: 7px 4px;
   text-align: left;
   font-size: 12px;
   font-weight: 700;
@@ -427,8 +430,7 @@ button {
 
 .category-prompt:hover,
 .category-prompt.active {
-  border-color: var(--line);
-  background: #fff;
+  background: transparent;
   color: var(--text);
 }
 
@@ -892,6 +894,11 @@ label {
 
 .editor-actions .button.primary {
   min-width: 82px;
+  min-height: 34px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent-strong);
+  padding: 0 11px;
 }
 
 .editor-actions .icon-button {
@@ -899,9 +906,11 @@ label {
   background: transparent;
 }
 
+.editor-actions .button.primary:hover,
 .editor-actions .icon-button:hover {
   border-color: var(--line);
   background: var(--panel);
+  color: var(--accent-strong);
 }
 
 .editor-tabs {
@@ -934,27 +943,6 @@ label {
   color: var(--text);
   border-bottom-color: var(--accent);
   box-shadow: none;
-}
-
-.editor-tabs strong {
-  display: inline-grid;
-  place-items: center;
-  min-width: 26px;
-  height: 22px;
-  border-radius: 999px;
-  background: var(--green-soft);
-  color: var(--green);
-  font-size: 11px;
-}
-
-.editor-tabs strong.medium {
-  background: var(--amber-soft);
-  color: var(--amber);
-}
-
-.editor-tabs strong.high {
-  background: var(--red-soft);
-  color: var(--red);
 }
 
 .tab-panel {
