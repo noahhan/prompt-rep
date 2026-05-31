@@ -2,6 +2,8 @@ const STORAGE_KEY = "prompt-vault:v1";
 
 const icons = {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>',
+  layout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>',
   shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-5"/></svg>',
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
@@ -19,7 +21,13 @@ const icons = {
 const els = {
   categoryList: document.querySelector("#categoryList"),
   tagList: document.querySelector("#tagList"),
+  overviewButton: document.querySelector("#overviewButton"),
+  overviewCount: document.querySelector("#overviewCount"),
+  overviewPanel: document.querySelector("#overviewPanel"),
+  overviewStats: document.querySelector("#overviewStats"),
+  overviewList: document.querySelector("#overviewList"),
   searchInput: document.querySelector("#searchInput"),
+  editorColumn: document.querySelector(".editor-column"),
   form: document.querySelector("#promptForm"),
   titleInput: document.querySelector("#titleInput"),
   editorStatus: document.querySelector("#editorStatus"),
@@ -84,6 +92,7 @@ let hasUnsavedChanges = false;
 let categoryFormOpen = false;
 let activeEditorTab = "prompt";
 let activeBodyView = "markdown";
+let workspaceView = "editor";
 const expandedCategories = new Set([state.prompts[0]?.category].filter(Boolean));
 
 function makeSeedState() {
@@ -178,10 +187,18 @@ function render() {
   updateStorageStatus();
   renderCategories();
   renderTags();
+  renderOverview();
   renderEditor();
+  renderWorkspaceView();
   renderEditorTabs();
   renderPromptBodyTabs();
   renderIcons();
+}
+
+function renderWorkspaceView() {
+  els.overviewPanel.hidden = workspaceView !== "overview";
+  els.editorColumn.hidden = workspaceView !== "editor";
+  els.overviewButton.classList.toggle("active", workspaceView === "overview");
 }
 
 function renderEditorTabs() {
@@ -226,7 +243,7 @@ function renderCategories() {
       return `<div class="category-node">
         <div class="nav-row">
           <button class="category-expand ${isExpanded ? "expanded" : ""}" type="button" data-toggle-category="${escapeHtml(category)}" aria-label="${isExpanded ? "Collapse" : "Expand"} ${escapeHtml(category)}">
-            <span aria-hidden="true">&gt;</span>
+            <span data-icon="chevron" aria-hidden="true"></span>
           </button>
           <button class="nav-item ${category === selectedCategory ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
             <span>${escapeHtml(category)}</span>
@@ -242,6 +259,56 @@ function renderCategories() {
     ...editableCategories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`),
     '<option value="__new__">+ Add new category...</option>'
   ].join("");
+  const selectedPrompt = getSelectedPrompt();
+  const currentCategory = els.categoryCustomInput.hidden ? els.categorySelect.value : els.categoryCustomInput.value;
+  setCategoryControlValue(hasPendingEditorChanges() ? currentCategory : selectedPrompt?.category);
+}
+
+function renderOverview() {
+  const prompts = state.prompts.filter(matchesSearchAndTag).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  const highRisk = prompts.filter((prompt) => auditPrompt(prompt).level === "high").length;
+  const variableCount = prompts.reduce((sum, prompt) => sum + getPlaceholders(prompt.body).length, 0);
+  const categoryCount = new Set(prompts.map((prompt) => prompt.category).filter(Boolean)).size;
+  els.overviewCount.textContent = prompts.length;
+  els.overviewStats.innerHTML = `
+    <span><strong>${prompts.length}</strong> prompts</span>
+    <span><strong>${categoryCount}</strong> categories</span>
+    <span><strong>${variableCount}</strong> variables</span>
+    <span><strong>${highRisk}</strong> high risk</span>
+  `;
+  els.overviewList.innerHTML = prompts.length
+    ? prompts.map(renderOverviewCard).join("")
+    : document.querySelector("#emptyStateTemplate").innerHTML;
+}
+
+function renderOverviewCard(prompt) {
+  const audit = auditPrompt(prompt);
+  const risk = audit.level === "low" ? "Low" : audit.level === "medium" ? "Med" : "High";
+  const placeholderCount = getPlaceholders(prompt.body).length;
+  const summary = prompt.summary || prompt.body || "No summary yet.";
+  const tags = prompt.tags.length ? prompt.tags.map((tag) => `<span class="mini-tag">${escapeHtml(tag)}</span>`).join("") : '<span class="mini-tag muted-tag">No tags</span>';
+  return `<button class="overview-card ${audit.level} ${prompt.id === selectedId ? "active" : ""}" type="button" data-prompt-id="${prompt.id}">
+    <div class="overview-card-main">
+      <div class="card-topline">
+        <span class="category-pill"><span class="category-dot ${audit.level}"></span>${escapeHtml(prompt.category || "Uncategorized")}</span>
+        <span class="risk ${audit.level}">${risk} risk</span>
+      </div>
+      <div class="card-title-row">
+        <h4>${escapeHtml(prompt.title || "Untitled prompt")}</h4>
+        <span class="updated-time">${formatDate(prompt.updatedAt)}</span>
+      </div>
+      <p>${escapeHtml(summary)}</p>
+      <div class="card-metrics" aria-label="Prompt metadata">
+        <span><strong>${audit.score}</strong> audit</span>
+        <span><strong>${placeholderCount}</strong> variables</span>
+        <span><strong>${prompt.history.length}</strong> versions</span>
+      </div>
+      <div class="card-footer">
+        <div class="tag-row">${tags}</div>
+        <span class="variable-count">{ } ${placeholderCount}</span>
+      </div>
+    </div>
+  </button>`;
 }
 
 function getPromptsForCategory(category) {
@@ -288,10 +355,7 @@ function renderEditor() {
   els.duplicateButton.disabled = isDraft;
   els.deleteButton.title = isDraft ? "Discard draft" : "Delete prompt";
   els.deleteButton.setAttribute("aria-label", isDraft ? "Discard draft" : "Delete prompt");
-  const hasCategory = state.categories.includes(prompt.category);
-  els.categorySelect.value = hasCategory ? prompt.category : "__new__";
-  els.categoryCustomInput.hidden = hasCategory;
-  els.categoryCustomInput.value = hasCategory ? "" : prompt.category;
+  setCategoryControlValue(prompt.category);
   els.tagsInput.value = prompt.tags.join(", ");
   els.summaryInput.value = prompt.summary;
   els.bodyInput.value = prompt.body;
@@ -584,6 +648,8 @@ function createPrompt() {
   selectedId = "__draft__";
   selectedVersionIndex = null;
   selectedTag = null;
+  workspaceView = "editor";
+  activeEditorTab = "prompt";
   hasUnsavedChanges = false;
   render();
   els.titleInput.focus();
@@ -616,6 +682,7 @@ function saveCurrentPrompt(event) {
   hasUnsavedChanges = false;
   ensureCategory(prompt.category);
   selectedCategory = selectedCategory === "All" ? "All" : prompt.category;
+  workspaceView = "editor";
   if (selectedTag && !prompt.tags.includes(selectedTag)) selectedTag = null;
   selectedVersionIndex = null;
   saveState();
@@ -638,6 +705,8 @@ function duplicatePrompt() {
   state.prompts.unshift(copy);
   selectedId = copy.id;
   selectedVersionIndex = null;
+  workspaceView = "editor";
+  activeEditorTab = "prompt";
   saveState();
   render();
 }
@@ -735,6 +804,14 @@ function getEditorCategory() {
     return els.categoryCustomInput.value.trim() || "Uncategorized";
   }
   return els.categorySelect.value || "Uncategorized";
+}
+
+function setCategoryControlValue(category) {
+  const normalizedCategory = category || "Uncategorized";
+  const hasCategory = state.categories.includes(normalizedCategory);
+  els.categorySelect.value = hasCategory ? normalizedCategory : "__new__";
+  els.categoryCustomInput.hidden = hasCategory;
+  els.categoryCustomInput.value = hasCategory ? "" : normalizedCategory;
 }
 
 function addCategory() {
@@ -950,8 +1027,17 @@ els.cancelDeleteButton.addEventListener("click", closeDeletePromptModal);
 els.cancelDeleteTextButton.addEventListener("click", closeDeletePromptModal);
 els.refreshAuditButton.addEventListener("click", refreshAuditFromEditor);
 els.restoreButton.addEventListener("click", restoreVersion);
+els.overviewButton.addEventListener("click", () => {
+  if (!confirmPendingEditorChanges()) return;
+  draftPrompt = null;
+  hasUnsavedChanges = false;
+  workspaceView = "overview";
+  activeEditorTab = "prompt";
+  render();
+});
 els.searchInput.addEventListener("input", () => {
   renderCategories();
+  renderOverview();
   renderIcons();
 });
 els.exportJsonButton.addEventListener("click", exportJson);
@@ -1025,6 +1111,7 @@ document.addEventListener("click", (event) => {
     expandedCategories.add(selectedCategory);
     selectedTag = null;
     selectFirstVisiblePrompt();
+    workspaceView = "editor";
     render();
   }
   const tagButton = event.target.closest("[data-tag]");
@@ -1035,6 +1122,7 @@ document.addEventListener("click", (event) => {
     selectedTag = selectedTag === tagButton.dataset.tag ? null : tagButton.dataset.tag;
     selectedCategory = "All";
     selectFirstVisiblePrompt();
+    workspaceView = "editor";
     render();
   }
   const promptButton = event.target.closest("[data-prompt-id]");
@@ -1044,6 +1132,8 @@ document.addEventListener("click", (event) => {
     hasUnsavedChanges = false;
     selectedId = promptButton.dataset.promptId;
     selectedVersionIndex = null;
+    workspaceView = "editor";
+    activeEditorTab = "prompt";
     render();
   }
   const versionButton = event.target.closest("[data-version-index]");

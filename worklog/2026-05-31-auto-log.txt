@@ -73,3 +73,6 @@ Removed the Prompt guide section, added expandable category prompt lists in the 
 [2026-05-31T13:37:09.151Z] DONE - Remove prompt list column
 Removed the redundant center Prompts area and expanded the prompt editor to use the main workspace width. Search now refreshes the left category tree.
 
+[2026-05-31T13:52:12.739Z] DONE - Add overview card view
+Added Overview as the first left-menu item, restored card-style prompt browsing there, replaced text arrows with chevron icons, and verified Preview plus category expand behavior.
+

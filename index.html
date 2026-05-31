@@ -23,6 +23,12 @@
           New prompt
         </button>
 
+        <button id="overviewButton" class="overview-link" type="button">
+          <span data-icon="layout"></span>
+          <span>Overview</span>
+          <strong id="overviewCount">0</strong>
+        </button>
+
         <section class="nav-section">
           <div class="section-head">
             <h2>Categories</h2>
@@ -90,6 +96,17 @@
         </header>
 
         <section class="workspace">
+          <section id="overviewPanel" class="overview-panel" aria-label="Prompt overview" hidden>
+            <div class="overview-head">
+              <div>
+                <h3>Prompt Overview</h3>
+                <p>All saved prompts in card view.</p>
+              </div>
+              <div id="overviewStats" class="overview-stats" aria-label="Prompt overview stats"></div>
+            </div>
+            <div id="overviewList" class="overview-list"></div>
+          </section>
+
           <section class="editor-column" aria-label="Prompt editor">
             <form id="promptForm" class="editor">
               <div class="editor-head">
