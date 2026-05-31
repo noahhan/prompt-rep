@@ -79,3 +79,6 @@ Added Overview as the first left-menu item, restored card-style prompt browsing 
 [2026-05-31T13:59:28.445Z] DONE - Widen audit tab and clean editor header
 Removed the narrow audit width, balanced the audit score layout, and grouped prompt editor actions and tabs into a cleaner header.
 
+[2026-05-31T14:09:36.402Z] DONE - Refine editor typography hierarchy
+Adjusted font sizes and weights across the editor, overview, tabs, labels, and audit panels so the page structure is clearer with fewer boxed controls.
+

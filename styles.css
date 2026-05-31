@@ -95,7 +95,7 @@ button {
 }
 
 .brand h1 {
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.15;
 }
 
@@ -343,6 +343,8 @@ button {
   padding: 9px 10px;
   color: var(--text);
   text-align: left;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .category-delete {
@@ -418,7 +420,7 @@ button {
   padding: 7px 9px;
   text-align: left;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -487,7 +489,7 @@ button {
 }
 
 .topbar h2 {
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.2;
 }
 
@@ -547,7 +549,7 @@ button {
 }
 
 .overview-head h3 {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.2;
 }
 
@@ -651,7 +653,7 @@ button {
   margin: 0;
   min-width: 0;
   color: var(--text);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.25;
 }
 
@@ -830,7 +832,7 @@ select:focus {
 
 .editor-toolbar {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   border-bottom: 1px solid var(--line);
   padding-bottom: 18px;
 }
@@ -844,12 +846,20 @@ select:focus {
   min-width: 0;
 }
 
+.editor-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 2px;
+}
+
 label {
   display: grid;
   gap: 7px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .title-input {
@@ -857,7 +867,7 @@ label {
   padding: 2px 0 0;
   border: 0;
   border-radius: 0;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   line-height: 1.15;
 }
@@ -870,7 +880,7 @@ label {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .editor-actions {
@@ -878,26 +888,30 @@ label {
   align-items: center;
   gap: 6px;
   flex: 0 0 auto;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel);
-  padding: 5px;
 }
 
 .editor-actions .button.primary {
   min-width: 82px;
 }
 
+.editor-actions .icon-button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.editor-actions .icon-button:hover {
+  border-color: var(--line);
+  background: var(--panel);
+}
+
 .editor-tabs {
   display: flex;
   align-items: center;
-  align-self: flex-start;
-  gap: 4px;
+  gap: 18px;
   width: min(100%, 430px);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
-  background: var(--panel-strong);
-  padding: 4px;
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 
 .editor-tabs button {
@@ -905,21 +919,21 @@ label {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  flex: 1;
-  min-height: 34px;
+  min-height: 32px;
   border: 0;
-  border-radius: 7px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 900;
+  padding: 0 2px;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .editor-tabs button.active {
-  background: #fff;
   color: var(--text);
-  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.08);
+  border-bottom-color: var(--accent);
+  box-shadow: none;
 }
 
 .editor-tabs strong {
@@ -982,7 +996,7 @@ label {
 
 .prompt-body-head label {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .body-view-tabs {
@@ -1019,7 +1033,7 @@ label {
 .prompt-body-panel textarea {
   min-height: 310px;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -1255,7 +1269,7 @@ label {
 }
 
 .placeholder-panel h3 {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 code {
@@ -1289,7 +1303,7 @@ code {
 }
 
 .panel-head h3 {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .audit-badge {
@@ -1336,7 +1350,7 @@ code {
 }
 
 .score-ring strong {
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1;
 }
 
@@ -1365,13 +1379,13 @@ code {
 
 .score-card span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .score-card strong {
   color: var(--text);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
 }
 
@@ -1423,7 +1437,7 @@ code {
 .audit-details h4 {
   margin: 0;
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .audit-checks,
@@ -1450,7 +1464,7 @@ code {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .factor-id {
@@ -1591,9 +1605,18 @@ code {
   .topbar,
   .topbar-actions,
   .editor-head,
+  .editor-control-row,
   .placeholder-panel {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .editor-tabs {
+    width: 100%;
+  }
+
+  .editor-actions {
+    justify-content: flex-end;
   }
 
   .search {
