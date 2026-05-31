@@ -410,13 +410,15 @@ function renderAudit(prompt) {
 
 function renderAuditBreakdown(audit) {
   const riskPenaltyText = audit.breakdown.riskPenaltyTotal ? `-${audit.breakdown.riskPenaltyTotal}` : "0";
-  const qualityPenaltyText = audit.breakdown.qualityPenaltyTotal ? `-${audit.breakdown.qualityPenaltyTotal}` : "0";
+  const structurePenaltyTotal = audit.breakdown.structurePenaltyTotal ?? audit.breakdown.qualityPenaltyTotal;
+  const structurePenalties = audit.breakdown.structurePenalties || audit.breakdown.qualityPenalties || [];
+  const structurePenaltyText = structurePenaltyTotal ? `-${structurePenaltyTotal}` : "0";
   const riskDetails = audit.breakdown.riskPenalties.length
-    ? audit.breakdown.riskPenalties.map((penalty) => `<span>-${penalty.points} ${escapeHtml(penalty.label)}</span>`).join("")
+    ? audit.breakdown.riskPenalties.map((penalty) => `<span>${escapeHtml(penalty.id)} -${penalty.points} ${escapeHtml(penalty.label)}</span>`).join("")
     : "<span>No risk penalty</span>";
-  const qualityDetails = audit.breakdown.qualityPenalties.length
-    ? audit.breakdown.qualityPenalties.map((penalty) => `<span>-${penalty.points} ${escapeHtml(penalty.label)}</span>`).join("")
-    : "<span>No quality penalty</span>";
+  const structureDetails = structurePenalties.length
+    ? structurePenalties.map((penalty) => `<span>${escapeHtml(penalty.id)} -${penalty.points} ${escapeHtml(penalty.label)}</span>`).join("")
+    : "<span>No structure penalty</span>";
   els.auditBreakdown.innerHTML = `
     <div class="score-card">
       <span>Base</span>
@@ -428,10 +430,10 @@ function renderAuditBreakdown(audit) {
       <strong>${riskPenaltyText}</strong>
       <small>${riskDetails}</small>
     </div>
-    <div class="score-card ${audit.breakdown.qualityPenaltyTotal ? "warn" : ""}">
-      <span>Quality penalty</span>
-      <strong>${qualityPenaltyText}</strong>
-      <small>${qualityDetails}</small>
+    <div class="score-card ${structurePenaltyTotal ? "warn" : ""}">
+      <span>Structure penalty</span>
+      <strong>${structurePenaltyText}</strong>
+      <small>${structureDetails}</small>
     </div>
     <div class="score-card final ${audit.level}">
       <span>Final</span>
@@ -442,8 +444,11 @@ function renderAuditBreakdown(audit) {
 }
 
 function renderAuditDetails(audit) {
-  const checks = audit.qualityChecks
-    .map((check) => `<li class="${check.status}"><strong>${escapeHtml(check.label)}</strong><span>${escapeHtml(check.detail)}</span></li>`)
+  const riskFactors = (audit.riskChecks || audit.breakdown.riskPenalties)
+    .map((factor) => `<li class="${factor.status === "review" || (factor.level === "high" && factor.points) ? "review" : ""}"><strong><b class="factor-id">${escapeHtml(factor.id)}</b>${escapeHtml(factor.label)}</strong><span>${factor.points ? `-${factor.points}` : "0"} points - ${escapeHtml(factor.detail)}</span></li>`)
+    .join("");
+  const checks = (audit.structureChecks || audit.qualityChecks)
+    .map((check) => `<li class="${check.status}"><strong><b class="factor-id">${escapeHtml(check.id)}</b>${escapeHtml(check.label)}</strong><span>${check.points ? `-${check.points}` : "0"} points - ${escapeHtml(check.detail)}</span></li>`)
     .join("");
   const suggestions = audit.suggestions.map((suggestion) => `<li>${escapeHtml(suggestion)}</li>`).join("");
   const placeholders = audit.placeholders.length
@@ -451,19 +456,23 @@ function renderAuditDetails(audit) {
     : '<span class="placeholder-chip">No variables</span>';
   els.auditDetails.innerHTML = `
     <section>
-      <h4>Prompt quality checks</h4>
+      <h4>Risk factors</h4>
+      <ul class="audit-checks">${riskFactors}</ul>
+    </section>
+    <section>
+      <h4>Structure factors</h4>
       <ul class="audit-checks">${checks}</ul>
     </section>
     <section>
-      <h4>Improvement suggestions</h4>
+      <h4>Suggestions</h4>
       <ul class="suggestion-list">${suggestions}</ul>
     </section>
     <section>
-      <h4>Reusable placeholders</h4>
+      <h4>Placeholders</h4>
       <div class="placeholder-list">${placeholders}</div>
     </section>
     <section>
-      <h4>Export warning</h4>
+      <h4>Export</h4>
       <p class="${audit.level === "high" ? "export-warning high" : "export-warning"}">${escapeHtml(audit.exportWarning)}</p>
     </section>
   `;

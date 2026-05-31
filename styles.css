@@ -1218,7 +1218,22 @@ code {
 }
 
 .audit-checks strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
+}
+
+.factor-id {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--text);
+  font-size: 10px;
+  line-height: 18px;
 }
 
 .audit-checks span,

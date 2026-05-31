@@ -52,3 +52,6 @@ Added score calculation cards in the Audit tab showing base score, risk penalty,
 [2026-05-31T11:17:48.708Z] DONE - Add detailed audit tab information
 Added quality checks, improvement suggestions, reusable placeholders, and export warning to the Audit tab.
 
+[2026-05-31T12:54:23.219Z] DONE - Clarify audit score factors
+Renamed quality checks to rule-based structure checks and added visible R1-R5 and S1-S4 score indexes in the Audit tab.
+
