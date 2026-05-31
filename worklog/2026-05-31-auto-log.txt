@@ -49,3 +49,6 @@ Changed audit and history from a separate drawer/button into editor tabs: Prompt
 [2026-05-31T11:09:49.057Z] DONE - Add audit score breakdown
 Added score calculation cards in the Audit tab showing base score, risk penalty, quality penalty, and final score.
 
+[2026-05-31T11:17:48.708Z] DONE - Add detailed audit tab information
+Added quality checks, improvement suggestions, reusable placeholders, and export warning to the Audit tab.
+

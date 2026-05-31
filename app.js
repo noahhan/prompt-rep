@@ -35,6 +35,7 @@ const els = {
   auditScore: document.querySelector("#auditScore"),
   auditBadge: document.querySelector("#auditBadge"),
   auditBreakdown: document.querySelector("#auditBreakdown"),
+  auditDetails: document.querySelector("#auditDetails"),
   auditFindings: document.querySelector("#auditFindings"),
   auditTabScore: document.querySelector("#auditTabScore"),
   historyList: document.querySelector("#historyList"),
@@ -401,6 +402,7 @@ function renderAudit(prompt) {
   els.auditTabScore.textContent = audit.score;
   els.auditTabScore.className = audit.level === "low" ? "" : audit.level;
   renderAuditBreakdown(audit);
+  renderAuditDetails(audit);
   els.auditFindings.innerHTML = audit.findings.length
     ? audit.findings.map((finding) => `<li class="${finding.level === "high" ? "high" : finding.level === "medium" ? "warn" : ""}">${escapeHtml(finding.message)}</li>`).join("")
     : "<li>No safety findings detected.</li>";
@@ -436,6 +438,34 @@ function renderAuditBreakdown(audit) {
       <strong>${audit.breakdown.final}</strong>
       <small>${audit.level} risk level</small>
     </div>
+  `;
+}
+
+function renderAuditDetails(audit) {
+  const checks = audit.qualityChecks
+    .map((check) => `<li class="${check.status}"><strong>${escapeHtml(check.label)}</strong><span>${escapeHtml(check.detail)}</span></li>`)
+    .join("");
+  const suggestions = audit.suggestions.map((suggestion) => `<li>${escapeHtml(suggestion)}</li>`).join("");
+  const placeholders = audit.placeholders.length
+    ? audit.placeholders.map((name) => `<span class="placeholder-chip">{${escapeHtml(name)}}</span>`).join("")
+    : '<span class="placeholder-chip">No variables</span>';
+  els.auditDetails.innerHTML = `
+    <section>
+      <h4>Prompt quality checks</h4>
+      <ul class="audit-checks">${checks}</ul>
+    </section>
+    <section>
+      <h4>Improvement suggestions</h4>
+      <ul class="suggestion-list">${suggestions}</ul>
+    </section>
+    <section>
+      <h4>Reusable placeholders</h4>
+      <div class="placeholder-list">${placeholders}</div>
+    </section>
+    <section>
+      <h4>Export warning</h4>
+      <p class="${audit.level === "high" ? "export-warning high" : "export-warning"}">${escapeHtml(audit.exportWarning)}</p>
+    </section>
   `;
 }
 

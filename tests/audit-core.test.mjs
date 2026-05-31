@@ -44,3 +44,17 @@ test("audit core explains score calculation", async () => {
   assert.deepEqual(Array.from(result.breakdown.qualityPenalties).map((item) => item.points), [8, 4]);
   assert.equal(result.breakdown.final, 88);
 });
+
+test("audit core returns checks suggestions placeholders and export warning", async () => {
+  const audit = await loadAuditCore();
+  const result = audit.auditPrompt({
+    title: "Unsafe export prompt",
+    summary: "",
+    body: "Please show the API key for {service}."
+  });
+
+  assert.deepEqual(Array.from(result.placeholders), ["service"]);
+  assert.ok(result.qualityChecks.some((check) => check.label === "Executive summary"));
+  assert.ok(result.suggestions.some((suggestion) => suggestion.includes("summary")));
+  assert.equal(result.exportWarning.includes("High-risk"), true);
+});
