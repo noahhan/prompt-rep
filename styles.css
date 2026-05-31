@@ -348,37 +348,39 @@ button {
   font-size: 18px;
 }
 
-.sort-segmented {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  min-height: 40px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
-  background: #eef4f7;
-  padding: 3px;
-}
-
-.sort-segmented button {
-  min-width: 62px;
-  height: 32px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
+.sort-control {
+  position: relative;
+  min-width: 182px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 900;
-  cursor: pointer;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.sort-segmented button:hover {
-  color: var(--text);
+.sort-control span {
+  position: absolute;
+  top: 7px;
+  left: 13px;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.sort-segmented button.active {
-  background: #111827;
-  color: #fff;
-  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.16);
+.sort-control select {
+  width: 100%;
+  height: 48px;
+  appearance: none;
+  border-color: #c8d5dd;
+  border-radius: 9px;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%) right 15px center / 6px 6px no-repeat,
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%) right 10px center / 6px 6px no-repeat,
+    linear-gradient(180deg, #ffffff 0%, #f3f7fa 100%);
+  color: #111827;
+  padding: 18px 34px 5px 12px;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03), 0 8px 18px rgba(15, 23, 42, 0.05);
 }
 
 .list-stats {

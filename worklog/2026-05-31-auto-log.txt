@@ -25,3 +25,6 @@ Reviewed user's screenshot, clarified it shows native sort menu, and updated pro
 [2026-05-31T10:02:05.658Z] DONE - Replace native sort dropdown
 Changed the prompt list sort control from a native dropdown to custom segmented buttons so the visible design matches the app style.
 
+[2026-05-31T10:14:55.305Z] DONE - Restore and style sort dropdown
+Restored the sort dropdown per user feedback and improved its visible design with label, custom arrow, spacing, border, and shadow.
+
