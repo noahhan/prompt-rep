@@ -34,3 +34,6 @@ Replaced browser prompt with inline category form, added cancel behavior, and ad
 [2026-05-31T10:29:10.546Z] DONE - Make audit panel toggleable
 Moved safety audit and history behind an Audit button so the prompt editor has more writing space by default.
 
+[2026-05-31T10:32:16.194Z] DONE - Fix audit button position
+Adjusted the editor header when audit menu is open so action buttons stay top-right and the title keeps full width.
+

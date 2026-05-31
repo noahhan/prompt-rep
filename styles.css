@@ -763,7 +763,9 @@ select:focus {
 }
 
 .editor-column.inspector-open .editor-actions {
+  order: -1;
   justify-content: flex-end;
+  margin-bottom: -4px;
 }
 
 .editor {
