@@ -10,3 +10,6 @@ Added LLM Wiki index/log, online support plan, in-app prompt guide, and verified
 [2026-05-31T07:52:41.238Z] DONE - Publish project to GitHub
 Checked ignored files and secret patterns, improved list UI, merged remote README, pushed main to public repository, and reset remote URL to the clean GitHub URL.
 
+[2026-05-31T09:04:09.335Z] DONE - Add agent blackboard
+Created shared blackboard folder for agent context, perspectives, decisions, notes, and tasks.
+
