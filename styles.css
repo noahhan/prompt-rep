@@ -330,7 +330,7 @@ button {
 
 .workspace {
   display: grid;
-  grid-template-columns: 360px minmax(0, 1fr);
+  grid-template-columns: 410px minmax(0, 1fr);
   min-height: calc(100vh - 79px);
 }
 
@@ -346,6 +346,32 @@ button {
 
 .list-toolbar h3 {
   font-size: 18px;
+}
+
+.list-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.list-stats span {
+  display: grid;
+  gap: 2px;
+  min-height: 54px;
+  border: 1px solid #dbe4ea;
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--muted);
+  padding: 9px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.list-stats strong {
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1;
 }
 
 select,
@@ -381,9 +407,7 @@ select:focus {
 
 .prompt-card {
   position: relative;
-  display: grid;
-  grid-template-columns: 5px minmax(0, 1fr);
-  gap: 0;
+  display: block;
   width: 100%;
   overflow: hidden;
   border: 1px solid #d4dde3;
@@ -391,6 +415,7 @@ select:focus {
   background: linear-gradient(180deg, #ffffff 0%, #fbfdfe 100%);
   padding: 0;
   text-align: left;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
   box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03), 0 10px 20px rgba(15, 23, 42, 0.04);
 }
 
@@ -405,18 +430,12 @@ select:focus {
   background: linear-gradient(180deg, #ffffff 0%, #f4fbfa 100%);
 }
 
-.prompt-accent {
-  display: block;
-  min-height: 100%;
-  background: var(--green);
-}
-
-.prompt-accent.medium {
-  background: var(--amber);
-}
-
-.prompt-accent.high {
-  background: var(--red);
+.prompt-card.active::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--accent);
+  content: "";
 }
 
 .prompt-card-main {
@@ -428,14 +447,16 @@ select:focus {
 
 .card-topline,
 .card-footer,
-.tag-row {
+.tag-row,
+.card-title-row {
   display: flex;
   align-items: center;
   gap: 7px;
 }
 
 .card-topline,
-.card-footer {
+.card-footer,
+.card-title-row {
   justify-content: space-between;
 }
 
@@ -444,6 +465,16 @@ select:focus {
   color: #111827;
   font-size: 16px;
   line-height: 1.3;
+}
+
+.card-title-row h4 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .prompt-card p {
@@ -463,6 +494,22 @@ select:focus {
   font-weight: 700;
 }
 
+.updated-time,
+.variable-count {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.variable-count {
+  border: 1px solid #cfe7e3;
+  border-radius: 999px;
+  background: #f0fdfa;
+  color: var(--accent-strong);
+  padding: 4px 8px;
+}
+
 .category-pill,
 .mini-tag {
   display: inline-flex;
@@ -475,12 +522,28 @@ select:focus {
 }
 
 .category-pill {
+  gap: 6px;
   overflow: hidden;
   background: #eef2f7;
   color: #475569;
   padding: 0 8px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.category-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--green);
+}
+
+.category-dot.medium {
+  background: var(--amber);
+}
+
+.category-dot.high {
+  background: var(--red);
 }
 
 .tag-row {

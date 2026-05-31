@@ -18,6 +18,7 @@ const els = {
   tagList: document.querySelector("#tagList"),
   promptList: document.querySelector("#promptList"),
   promptCount: document.querySelector("#promptCount"),
+  listStats: document.querySelector("#listStats"),
   searchInput: document.querySelector("#searchInput"),
   sortSelect: document.querySelector("#sortSelect"),
   form: document.querySelector("#promptForm"),
@@ -244,32 +245,47 @@ function getFilteredPrompts() {
 function renderPromptList() {
   const prompts = getFilteredPrompts();
   els.promptCount.textContent = `${prompts.length} saved`;
+  renderListStats(prompts);
   els.promptList.innerHTML = prompts.length
     ? prompts
         .map((prompt) => {
           const audit = auditPrompt(prompt);
           const risk = audit.level === "low" ? "Low" : audit.level === "medium" ? "Med" : "High";
           const placeholderCount = getPlaceholders(prompt.body).length;
+          const summary = prompt.summary || prompt.body || "No summary yet.";
+          const updated = formatDate(prompt.updatedAt);
           const tags = prompt.tags.length ? prompt.tags.map((tag) => `<span class="mini-tag">${escapeHtml(tag)}</span>`).join("") : '<span class="mini-tag muted-tag">No tags</span>';
           return `<button class="prompt-card ${prompt.id === selectedId ? "active" : ""}" type="button" data-prompt-id="${prompt.id}">
-            <span class="prompt-accent ${audit.level}" aria-hidden="true"></span>
             <div class="prompt-card-main">
               <div class="card-topline">
-                <span class="category-pill">${escapeHtml(prompt.category || "Uncategorized")}</span>
-                <span class="risk ${audit.level}">${risk}</span>
+                <span class="category-pill"><span class="category-dot ${audit.level}"></span>${escapeHtml(prompt.category || "Uncategorized")}</span>
+                <span class="risk ${audit.level}">${risk} risk</span>
               </div>
-              <h4>${escapeHtml(prompt.title || "Untitled prompt")}</h4>
-              <p>${escapeHtml(prompt.summary || prompt.body || "No summary yet.")}</p>
-              <div class="tag-row">${tags}</div>
+              <div class="card-title-row">
+                <h4>${escapeHtml(prompt.title || "Untitled prompt")}</h4>
+                <span class="updated-time">${updated}</span>
+              </div>
+              <p>${escapeHtml(summary)}</p>
               <div class="card-footer">
-                <span>${placeholderCount} variables</span>
-                <span>${formatDate(prompt.updatedAt)}</span>
+                <div class="tag-row">${tags}</div>
+                <span class="variable-count">{ } ${placeholderCount}</span>
               </div>
             </div>
           </button>`;
         })
         .join("")
     : document.querySelector("#emptyStateTemplate").innerHTML;
+}
+
+function renderListStats(prompts) {
+  const highRisk = prompts.filter((prompt) => auditPrompt(prompt).level === "high").length;
+  const variableCount = prompts.reduce((sum, prompt) => sum + getPlaceholders(prompt.body).length, 0);
+  const categories = new Set(prompts.map((prompt) => prompt.category).filter(Boolean)).size;
+  els.listStats.innerHTML = `
+    <span><strong>${categories}</strong> categories</span>
+    <span><strong>${variableCount}</strong> variables</span>
+    <span><strong>${highRisk}</strong> high risk</span>
+  `;
 }
 
 function renderEditor() {
