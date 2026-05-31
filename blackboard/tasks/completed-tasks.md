@@ -20,3 +20,4 @@
 - Ran UI/UX browser test and fixed critical editor/import/audit issues.
 - Replaced category popup with inline add form.
 - Added safe delete for empty categories.
+- Moved safety audit and history into a toggleable audit menu.

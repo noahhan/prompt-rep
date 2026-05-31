@@ -2,6 +2,8 @@ const STORAGE_KEY = "prompt-vault:v1";
 
 const icons = {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-5"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/></svg>',
   download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>',
@@ -33,6 +35,9 @@ const els = {
   auditScore: document.querySelector("#auditScore"),
   auditBadge: document.querySelector("#auditBadge"),
   auditFindings: document.querySelector("#auditFindings"),
+  inspectorPanel: document.querySelector("#inspectorPanel"),
+  inspectorToggleButton: document.querySelector("#inspectorToggleButton"),
+  closeInspectorButton: document.querySelector("#closeInspectorButton"),
   historyList: document.querySelector("#historyList"),
   restoreButton: document.querySelector("#restoreButton"),
   storageStatus: document.querySelector("#storageStatus"),
@@ -110,6 +115,7 @@ let pendingImportPrompts = [];
 let draftPrompt = null;
 let hasUnsavedChanges = false;
 let categoryFormOpen = false;
+let inspectorOpen = false;
 
 function makeSeedState() {
   const now = new Date().toISOString();
@@ -241,7 +247,16 @@ function render() {
   renderPromptList();
   renderEditor();
   renderGuide();
+  renderInspectorState();
   renderIcons();
+}
+
+function renderInspectorState() {
+  els.inspectorPanel.hidden = !inspectorOpen;
+  els.inspectorPanel.classList.toggle("open", inspectorOpen);
+  els.inspectorPanel.parentElement.classList.toggle("inspector-open", inspectorOpen);
+  els.inspectorToggleButton.setAttribute("aria-expanded", String(inspectorOpen));
+  els.inspectorToggleButton.classList.toggle("active", inspectorOpen);
 }
 
 function renderCategories() {
@@ -358,9 +373,11 @@ function renderEditor() {
     els.form.querySelectorAll("input, textarea, select, button").forEach((node) => {
       if (node.id !== "newPromptButton") node.disabled = true;
     });
+    els.inspectorToggleButton.disabled = true;
     return;
   }
   els.form.querySelectorAll("input, textarea, select, button").forEach((node) => (node.disabled = false));
+  els.inspectorToggleButton.disabled = false;
   const isDraft = selectedId === "__draft__";
   els.titleInput.value = prompt.title;
   els.editorStatus.textContent = isDraft ? "Draft - not saved yet" : "Saved prompt";
@@ -404,6 +421,8 @@ function renderAudit(prompt) {
   els.auditScore.parentElement.className = `score-ring ${audit.level}`;
   els.auditBadge.textContent = audit.level === "low" ? "Clean" : audit.level === "medium" ? "Review" : "Risk";
   els.auditBadge.className = `audit-badge ${audit.level === "low" ? "" : audit.level}`;
+  els.inspectorToggleButton.className = `button ghost audit-toggle ${inspectorOpen ? "active" : ""} ${audit.level === "low" ? "" : audit.level}`;
+  els.inspectorToggleButton.innerHTML = `<span data-icon="shield"></span><span>Audit</span><strong>${audit.score}</strong>`;
   els.auditFindings.innerHTML = audit.findings.length
     ? audit.findings.map((finding) => `<li class="${finding.level === "high" ? "high" : finding.level === "medium" ? "warn" : ""}">${escapeHtml(finding.message)}</li>`).join("")
     : "<li>No safety findings detected.</li>";
@@ -617,6 +636,18 @@ function deleteCategory(category) {
   }
   saveState();
   render();
+}
+
+function toggleInspector() {
+  inspectorOpen = !inspectorOpen;
+  renderInspectorState();
+  renderIcons();
+}
+
+function closeInspector() {
+  inspectorOpen = false;
+  renderInspectorState();
+  renderIcons();
 }
 
 function exportJson() {
@@ -836,6 +867,8 @@ els.newPromptButton.addEventListener("click", createPrompt);
 els.addCategoryButton.addEventListener("click", addCategory);
 els.categoryForm.addEventListener("submit", saveNewCategory);
 els.cancelCategoryButton.addEventListener("click", closeCategoryForm);
+els.inspectorToggleButton.addEventListener("click", toggleInspector);
+els.closeInspectorButton.addEventListener("click", closeInspector);
 els.form.addEventListener("submit", saveCurrentPrompt);
 els.duplicateButton.addEventListener("click", duplicatePrompt);
 els.deleteButton.addEventListener("click", deletePrompt);

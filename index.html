@@ -118,6 +118,10 @@
                   <p id="editorStatus" class="editor-status"></p>
                 </div>
                 <div class="editor-actions">
+                  <button id="inspectorToggleButton" class="button ghost" type="button" aria-expanded="false" aria-controls="inspectorPanel">
+                    <span data-icon="shield"></span>
+                    Audit
+                  </button>
                   <button id="duplicateButton" class="icon-button" type="button" title="Duplicate prompt" aria-label="Duplicate prompt">
                     <span data-icon="copy"></span>
                   </button>
@@ -178,7 +182,16 @@
               </section>
             </form>
 
-            <aside class="inspector" aria-label="Safety and history">
+            <aside id="inspectorPanel" class="inspector" aria-label="Safety and history" hidden>
+              <div class="inspector-head">
+                <div>
+                  <h3>Audit menu</h3>
+                  <p>Safety and history</p>
+                </div>
+                <button id="closeInspectorButton" class="icon-button" type="button" aria-label="Close audit menu">
+                  <span data-icon="x"></span>
+                </button>
+              </div>
               <section class="audit-panel">
                 <div class="panel-head">
                   <h3>Safety audit</h3>

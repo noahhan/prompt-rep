@@ -148,6 +148,33 @@ button {
   background: var(--panel);
 }
 
+.button.ghost.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.audit-toggle strong {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green);
+  font-size: 11px;
+}
+
+.audit-toggle.medium strong {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.audit-toggle.high strong {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
 .button.compact {
   min-height: 30px;
   padding: 0 10px;
@@ -723,7 +750,20 @@ select:focus {
 
 .editor-column {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.editor-column.inspector-open {
   grid-template-columns: minmax(0, 1fr) 300px;
+}
+
+.editor-column.inspector-open .editor-head {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.editor-column.inspector-open .editor-actions {
+  justify-content: flex-end;
 }
 
 .editor {
@@ -1000,12 +1040,41 @@ code {
 }
 
 .inspector {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 16px;
   border-left: 1px solid var(--line);
   background: #fbfcfd;
   padding: 18px;
+}
+
+.inspector.open {
+  display: flex;
+}
+
+.inspector[hidden] {
+  display: none;
+}
+
+.inspector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inspector-head h3,
+.inspector-head p {
+  margin: 0;
+}
+
+.inspector-head h3 {
+  font-size: 15px;
+}
+
+.inspector-head p {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .audit-panel,
@@ -1144,7 +1213,11 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .inspector {
+  .editor-column.inspector-open {
+    grid-template-columns: 1fr;
+  }
+
+  .inspector.open {
     display: grid;
     grid-template-columns: 1fr 1fr;
     border-left: 0;
@@ -1169,7 +1242,7 @@ code {
     border-bottom: 1px solid var(--line);
   }
 
-  .inspector {
+  .inspector.open {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
@@ -1198,7 +1271,7 @@ code {
   }
 
   .meta-grid,
-  .inspector {
+  .inspector.open {
     grid-template-columns: 1fr;
   }
 }

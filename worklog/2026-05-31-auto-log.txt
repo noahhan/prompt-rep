@@ -31,3 +31,6 @@ Restored the sort dropdown per user feedback and improved its visible design wit
 [2026-05-31T10:22:09.371Z] DONE - Improve category UX
 Replaced browser prompt with inline category form, added cancel behavior, and added safe delete buttons only for empty categories.
 
+[2026-05-31T10:29:10.546Z] DONE - Make audit panel toggleable
+Moved safety audit and history behind an Audit button so the prompt editor has more writing space by default.
+
