@@ -70,3 +70,6 @@ Added Markdown table rendering to the Prompt body Preview tab and verified Korea
 [2026-05-31T13:24:37.685Z] DONE - Simplify prompt navigation
 Removed the Prompt guide section, added expandable category prompt lists in the left menu, and made the center prompt list more compact.
 
+[2026-05-31T13:37:09.151Z] DONE - Remove prompt list column
+Removed the redundant center Prompts area and expanded the prompt editor to use the main workspace width. Search now refreshes the left category tree.
+

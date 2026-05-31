@@ -19,11 +19,7 @@ const icons = {
 const els = {
   categoryList: document.querySelector("#categoryList"),
   tagList: document.querySelector("#tagList"),
-  promptList: document.querySelector("#promptList"),
-  promptCount: document.querySelector("#promptCount"),
-  listStats: document.querySelector("#listStats"),
   searchInput: document.querySelector("#searchInput"),
-  sortSelect: document.querySelector("#sortSelect"),
   form: document.querySelector("#promptForm"),
   titleInput: document.querySelector("#titleInput"),
   editorStatus: document.querySelector("#editorStatus"),
@@ -57,10 +53,6 @@ const els = {
   importFile: document.querySelector("#importFile"),
   exportJsonButton: document.querySelector("#exportJsonButton"),
   exportMdButton: document.querySelector("#exportMdButton"),
-  guideTaskSelect: document.querySelector("#guideTaskSelect"),
-  guidePatternList: document.querySelector("#guidePatternList"),
-  guideTemplatePreview: document.querySelector("#guideTemplatePreview"),
-  insertGuideButton: document.querySelector("#insertGuideButton"),
   importPreviewModal: document.querySelector("#importPreviewModal"),
   importPreviewBody: document.querySelector("#importPreviewBody"),
   confirmImportButton: document.querySelector("#confirmImportButton"),
@@ -79,49 +71,6 @@ const els = {
 
 const { auditPrompt, getPlaceholders } = window.PromptVaultAudit;
 const importCore = window.PromptVaultImport;
-
-const promptGuide = [
-  {
-    task: "Executive summary",
-    patterns: ["Persona", "Context block", "Output format", "Check"],
-    placeholders: ["role", "audience", "source_notes", "desired_length"],
-    guidance: "Use this when you need a short decision-ready summary.",
-    scaffold:
-      "You are a {role}. Prepare an executive summary for {audience}.\n\nContext:\n\"\"\"\n{source_notes}\n\"\"\"\n\nReturn:\n## Summary\n- {desired_length} concise bullets\n\n## Key decisions\n- Decision, reason, owner\n\n## Risks\n- Risk, impact, mitigation\n\n## Next actions\n- Action, owner, due date\n\nThink privately. Return only the structured answer and key assumptions."
-  },
-  {
-    task: "Code review",
-    patterns: ["Persona", "Rubric", "Severity", "Safety"],
-    placeholders: ["language", "diff"],
-    guidance: "Use this when you need bugs, risks, and missing tests.",
-    scaffold:
-      "You are a senior {language} engineer.\n\nReview this diff:\n```diff\n{diff}\n```\n\nCheck:\n- Correctness\n- Security and privacy\n- Data loss\n- Performance\n- Missing tests\n\nReturn findings first, ordered by severity. Include file and line when possible."
-  },
-  {
-    task: "Research synthesis",
-    patterns: ["Context block", "Evidence", "Uncertainty", "Format"],
-    placeholders: ["research_question", "sources", "answer_length"],
-    guidance: "Use this when you need an answer based on sources.",
-    scaffold:
-      "Answer this question: {research_question}\n\nSources:\n\"\"\"\n{sources}\n\"\"\"\n\nReturn:\n## Answer\n{answer_length}\n\n## Evidence table\n| Claim | Evidence | Source | Confidence |\n\n## Uncertainty\n- List gaps, conflicts, and assumptions.\n\nUse only the sources unless you clearly label outside knowledge."
-  },
-  {
-    task: "Data extraction",
-    patterns: ["Few-shot", "Schema", "Delimiter", "Validation"],
-    placeholders: ["schema", "examples", "source_text"],
-    guidance: "Use this when you need clean JSON or table output.",
-    scaffold:
-      "Extract data into this schema:\n```json\n{schema}\n```\n\nRules:\n- Use null for missing values.\n- Do not invent fields.\n- Preserve source wording.\n\nExamples:\n{examples}\n\nText:\n\"\"\"\n{source_text}\n\"\"\"\n\nReturn valid JSON only."
-  },
-  {
-    task: "Writing and editing",
-    patterns: ["Persona", "Audience", "Tone", "Examples"],
-    placeholders: ["audience", "communication_goal", "tone", "style_reference", "draft"],
-    guidance: "Use this when style, reader, and tone matter.",
-    scaffold:
-      "You are an editor writing for {audience}.\n\nGoal: {communication_goal}\nTone: {tone}\n\nStyle reference:\n\"\"\"\n{style_reference}\n\"\"\"\n\nDraft:\n\"\"\"\n{draft}\n\"\"\"\n\nRevise the draft. Keep the facts. Return the revised version and a short change note."
-  }
-];
 
 let state = loadState() || makeSeedState();
 let selectedId = state.prompts[0]?.id || null;
@@ -229,9 +178,7 @@ function render() {
   updateStorageStatus();
   renderCategories();
   renderTags();
-  renderPromptList();
   renderEditor();
-  renderGuide();
   renderEditorTabs();
   renderPromptBodyTabs();
   renderIcons();
@@ -255,14 +202,16 @@ function renderEditorTabs() {
 
 function renderCategories() {
   const counts = new Map();
-  state.prompts.forEach((prompt) => counts.set(prompt.category, (counts.get(prompt.category) || 0) + 1));
+  const totalCounts = new Map();
+  state.prompts.forEach((prompt) => totalCounts.set(prompt.category, (totalCounts.get(prompt.category) || 0) + 1));
+  state.prompts.filter(matchesSearchAndTag).forEach((prompt) => counts.set(prompt.category, (counts.get(prompt.category) || 0) + 1));
   const categories = ["All", ...state.categories.filter(Boolean).sort()];
   const editableCategories = state.categories.filter(Boolean).sort();
   els.categoryForm.hidden = !categoryFormOpen;
   els.categoryList.innerHTML = categories
     .map((category) => {
-      const count = category === "All" ? state.prompts.length : counts.get(category) || 0;
-      const canDelete = category !== "All" && count === 0;
+      const count = category === "All" ? state.prompts.filter(matchesSearchAndTag).length : counts.get(category) || 0;
+      const canDelete = category !== "All" && (totalCounts.get(category) || 0) === 0;
       const isExpanded = expandedCategories.has(category);
       const categoryPrompts = getPromptsForCategory(category);
       const promptLinks = isExpanded && categoryPrompts.length
@@ -296,7 +245,7 @@ function renderCategories() {
 }
 
 function getPromptsForCategory(category) {
-  const prompts = category === "All" ? state.prompts : state.prompts.filter((prompt) => prompt.category === category);
+  const prompts = (category === "All" ? state.prompts : state.prompts.filter((prompt) => prompt.category === category)).filter(matchesSearchAndTag);
   return [...prompts].sort((a, b) => a.title.localeCompare(b.title));
 }
 
@@ -307,60 +256,15 @@ function renderTags() {
     : '<span class="tag">No tags yet</span>';
 }
 
-function getFilteredPrompts() {
+function matchesSearchAndTag(prompt) {
   const query = els.searchInput.value.trim().toLowerCase();
-  const prompts = state.prompts.filter((prompt) => {
-    const inCategory = selectedCategory === "All" || prompt.category === selectedCategory;
-    const inTag = !selectedTag || prompt.tags.includes(selectedTag);
-    const haystack = `${prompt.title} ${prompt.category} ${prompt.tags.join(" ")} ${prompt.summary} ${prompt.body}`.toLowerCase();
-    return inCategory && inTag && (!query || haystack.includes(query));
-  });
-  const sort = els.sortSelect.value;
-  return prompts.sort((a, b) => {
-    if (sort === "title") return a.title.localeCompare(b.title);
-    if (sort === "risk") return auditPrompt(a).score - auditPrompt(b).score;
-    return new Date(b.updatedAt) - new Date(a.updatedAt);
-  });
+  const inTag = !selectedTag || prompt.tags.includes(selectedTag);
+  const haystack = `${prompt.title} ${prompt.category} ${prompt.tags.join(" ")} ${prompt.summary} ${prompt.body}`.toLowerCase();
+  return inTag && (!query || haystack.includes(query));
 }
 
-function renderPromptList() {
-  const prompts = getFilteredPrompts();
-  els.promptCount.textContent = `${prompts.length} saved`;
-  renderListStats(prompts);
-  els.promptList.innerHTML = prompts.length
-    ? prompts
-        .map((prompt) => {
-          const audit = auditPrompt(prompt);
-          const risk = audit.level === "low" ? "Low" : audit.level === "medium" ? "Med" : "High";
-          const updated = formatDate(prompt.updatedAt);
-          const category = prompt.category || "Uncategorized";
-          return `<button class="prompt-card ${audit.level} ${prompt.id === selectedId ? "active" : ""}" type="button" data-prompt-id="${prompt.id}">
-            <div class="prompt-card-main">
-              <div class="card-title-row">
-                <h4>${escapeHtml(prompt.title || "Untitled prompt")}</h4>
-                <span class="risk ${audit.level}">${risk}</span>
-              </div>
-              <div class="compact-meta">
-                <span>${escapeHtml(category)}</span>
-                <span>${updated}</span>
-                <span>${audit.score} audit</span>
-              </div>
-            </div>
-          </button>`;
-        })
-        .join("")
-    : document.querySelector("#emptyStateTemplate").innerHTML;
-}
-
-function renderListStats(prompts) {
-  const highRisk = prompts.filter((prompt) => auditPrompt(prompt).level === "high").length;
-  const variableCount = prompts.reduce((sum, prompt) => sum + getPlaceholders(prompt.body).length, 0);
-  const categories = new Set(prompts.map((prompt) => prompt.category).filter(Boolean)).size;
-  els.listStats.innerHTML = `
-    <span><strong>${categories}</strong> categories</span>
-    <span><strong>${variableCount}</strong> variables</span>
-    <span><strong>${highRisk}</strong> high risk</span>
-  `;
+function getFilteredPrompts() {
+  return getPromptsForCategory(selectedCategory).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 }
 
 function selectFirstVisiblePrompt() {
@@ -392,21 +296,9 @@ function renderEditor() {
   els.summaryInput.value = prompt.summary;
   els.bodyInput.value = prompt.body;
   renderPromptPreview(prompt.body);
-  if (els.guideTaskSelect?.options.length) {
-    els.guideTaskSelect.value = String(guessGuideIndex(prompt));
-  }
   renderPlaceholders(prompt);
   renderAudit(prompt);
   renderHistory(prompt);
-}
-
-function guessGuideIndex(prompt) {
-  const text = `${prompt.title} ${prompt.category} ${prompt.tags.join(" ")} ${prompt.summary} ${prompt.body}`.toLowerCase();
-  if (/(code|review|diff|bug|security|test|language)/.test(text)) return 1;
-  if (/(research|source|evidence|confidence|synthesis)/.test(text)) return 2;
-  if (/(extract|json|schema|field|table)/.test(text)) return 3;
-  if (/(write|edit|draft|tone|audience|style)/.test(text)) return 4;
-  return 0;
 }
 
 function renderPlaceholders(prompt) {
@@ -923,40 +815,6 @@ ${prompt.body}
   downloadFile(`prompt-vault-${dateStamp()}.md`, md, "text/markdown");
 }
 
-function renderGuide() {
-  if (!els.guideTaskSelect || !els.guidePatternList) return;
-  if (!els.guideTaskSelect.options.length) {
-    els.guideTaskSelect.innerHTML = promptGuide.map((item, index) => `<option value="${index}">${escapeHtml(item.task)}</option>`).join("");
-  }
-  const item = promptGuide[Number(els.guideTaskSelect.value) || 0];
-  els.guidePatternList.innerHTML = `
-    <p>${escapeHtml(item.guidance)}</p>
-    <div class="guide-chips">
-      ${item.patterns.map((pattern) => `<span>${escapeHtml(pattern)}</span>`).join("")}
-    </div>
-    <div class="guide-placeholders">
-      <strong>Useful placeholders</strong>
-      <span>${item.placeholders.map((name) => `{${escapeHtml(name)}}`).join(" ")}</span>
-    </div>
-  `;
-  els.guideTemplatePreview.textContent = item.scaffold;
-}
-
-function insertGuideScaffold() {
-  const item = promptGuide[Number(els.guideTaskSelect.value) || 0];
-  const prefix = els.bodyInput.value.trim() ? `${els.bodyInput.value.trim()}\n\n---\n\n` : "";
-  els.bodyInput.value = `${prefix}${item.scaffold}`;
-  const draft = {
-    title: els.titleInput.value,
-    summary: els.summaryInput.value,
-    body: els.bodyInput.value
-  };
-  renderPlaceholders(draft);
-  renderPromptPreview(draft.body);
-  markEditorDirty();
-  els.bodyInput.focus();
-}
-
 function downloadFile(filename, content, type) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -1092,12 +950,12 @@ els.cancelDeleteButton.addEventListener("click", closeDeletePromptModal);
 els.cancelDeleteTextButton.addEventListener("click", closeDeletePromptModal);
 els.refreshAuditButton.addEventListener("click", refreshAuditFromEditor);
 els.restoreButton.addEventListener("click", restoreVersion);
-els.searchInput.addEventListener("input", renderPromptList);
-els.sortSelect.addEventListener("change", renderPromptList);
+els.searchInput.addEventListener("input", () => {
+  renderCategories();
+  renderIcons();
+});
 els.exportJsonButton.addEventListener("click", exportJson);
 els.exportMdButton.addEventListener("click", exportMarkdown);
-els.guideTaskSelect?.addEventListener("change", renderGuide);
-els.insertGuideButton?.addEventListener("click", insertGuideScaffold);
 els.confirmImportButton.addEventListener("click", confirmImportPreview);
 els.cancelImportButton.addEventListener("click", closeImportPreview);
 els.cancelImportTextButton.addEventListener("click", closeImportPreview);
