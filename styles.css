@@ -972,16 +972,23 @@ label {
   display: none;
 }
 
+.body-view-panel,
+.prompt-body-panel textarea,
+.prompt-preview {
+  height: 360px;
+}
+
 .prompt-body-panel textarea {
-  min-height: 310px;
+  min-height: 360px;
+  resize: none;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 14px;
   line-height: 1.6;
 }
 
 .prompt-preview {
-  min-height: 310px;
-  max-height: 520px;
+  min-height: 360px;
+  max-height: 360px;
   overflow: auto;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);

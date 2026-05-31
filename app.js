@@ -1,4 +1,6 @@
 const STORAGE_KEY = "prompt-vault:v1";
+const STARTER_LIBRARY_KEY = "prompt-vault:starter-library-version";
+const STARTER_LIBRARY_VERSION = "2026-05-31-prompt-engineering-library";
 
 const icons = {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>',
@@ -140,20 +142,42 @@ function loadState() {
 
 async function loadDataFileIfEmpty() {
   try {
-    if (localStorage.getItem(STORAGE_KEY)) return;
     const response = await fetch("./data/prompts.json", { cache: "no-store" });
     if (!response.ok) return;
     const data = await response.json();
     const prompts = Array.isArray(data.prompts) ? data.prompts : [];
     if (!prompts.length) return;
+    if (localStorage.getItem(STORAGE_KEY)) {
+      if (localStorage.getItem(STARTER_LIBRARY_KEY) === STARTER_LIBRARY_VERSION) return;
+      mergeStarterLibrary(data);
+      localStorage.setItem(STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
+      return;
+    }
     state = {
       categories: Array.isArray(data.categories) ? data.categories : [...new Set(prompts.map((prompt) => prompt.category).filter(Boolean))],
       prompts
     };
     selectedId = state.prompts[0]?.id || null;
+    selectedCategory = state.prompts[0]?.category || state.categories[0] || null;
+    localStorage.setItem(STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
   } catch {
     // Direct file opening cannot fetch local JSON. Seed data is used instead.
   }
+}
+
+function mergeStarterLibrary(data) {
+  const prompts = Array.isArray(data.prompts) ? data.prompts : [];
+  const categories = Array.isArray(data.categories) ? data.categories : [];
+  const existingIds = new Set(state.prompts.map((prompt) => prompt.id));
+  const existingKeys = new Set(state.prompts.map(promptKey));
+  categories.forEach(ensureCategory);
+  prompts.forEach((item) => {
+    const prompt = normalizePrompt(item, item.createdAt || new Date().toISOString());
+    if (existingIds.has(prompt.id) || existingKeys.has(promptKey(prompt))) return;
+    state.prompts.push(prompt);
+    existingIds.add(prompt.id);
+    existingKeys.add(promptKey(prompt));
+  });
 }
 
 function saveState() {

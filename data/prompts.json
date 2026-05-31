@@ -1,21 +1,142 @@
 {
   "categories": [
-    "Writing",
+    "Prompt Engineering",
+    "Business",
     "Research",
     "Coding",
-    "Business"
+    "Writing",
+    "Data",
+    "Analysis"
   ],
   "prompts": [
+    {
+      "id": "seed-persona-task-builder",
+      "title": "Persona task builder",
+      "category": "Prompt Engineering",
+      "tags": ["persona", "task", "criteria"],
+      "summary": "Sets a useful role, target audience, task goal, and success criteria.",
+      "body": "You are a {role}. Your job is to {task_goal} for {audience}.\n\nUse these criteria:\n{criteria}\n\nContext:\n{context}\n\nReturn:\n1. Best answer\n2. Key assumptions\n3. Checks performed",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-context-block-answer",
+      "title": "Context-grounded answer",
+      "category": "Prompt Engineering",
+      "tags": ["context", "grounding", "accuracy"],
+      "summary": "Separates instructions from source material and asks the model not to invent facts.",
+      "body": "Task: {task}\n\nContext:\n\"\"\"\n{source_text}\n\"\"\"\n\nUse only the context above. If the context is not enough, say what is missing. Label any assumption clearly.\n\nReturn:\n- Answer\n- Evidence from context\n- Missing information",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-few-shot-classifier",
+      "title": "Few-shot classifier",
+      "category": "Prompt Engineering",
+      "tags": ["few-shot", "classification", "examples"],
+      "summary": "Uses examples to classify or transform new input in a consistent way.",
+      "body": "Classify the new input by following the examples.\n\nLabels:\n{labels}\n\nExample 1\nInput: {example_input_1}\nOutput: {example_output_1}\n\nExample 2\nInput: {example_input_2}\nOutput: {example_output_2}\n\nNew input:\n{new_input}\n\nReturn only:\n- Label\n- Short reason",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-output-format-builder",
+      "title": "Structured output builder",
+      "category": "Prompt Engineering",
+      "tags": ["format", "structure", "markdown"],
+      "summary": "Forces a clear Markdown structure that is easy to compare and reuse.",
+      "body": "Complete {task}.\n\nUse this exact format:\n\n## Summary\n- {summary_rule}\n\n## Details\n- {detail_rule}\n\n## Risks or limits\n- {risk_rule}\n\n## Next actions\n- {action_rule}\n\nInput:\n{input}",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-concise-reasoning-decision",
+      "title": "Concise reasoning decision",
+      "category": "Analysis",
+      "tags": ["reasoning", "decision", "assumptions"],
+      "summary": "Supports complex decisions without asking for hidden chain-of-thought.",
+      "body": "Think through this task privately. Do not show hidden chain-of-thought.\n\nDecision to make:\n{decision_context}\n\nOptions:\n{options}\n\nConstraints:\n{constraints}\n\nReturn:\n1. Recommendation\n2. Key assumptions\n3. Concise rationale\n4. Risks\n5. Checks performed",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-rubric-evaluator",
+      "title": "Rubric evaluator",
+      "category": "Analysis",
+      "tags": ["rubric", "evaluation", "quality"],
+      "summary": "Evaluates an item with clear criteria and ordered findings.",
+      "body": "Evaluate {item_name} using this rubric:\n\n- Correctness: {correctness_definition}\n- Completeness: {completeness_definition}\n- Safety: {safety_definition}\n- Clarity: {clarity_definition}\n\nItem:\n{item}\n\nReturn findings ordered by severity. For each finding, include the issue, why it matters, and a fix.",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-safety-boundary-check",
+      "title": "Safety boundary check",
+      "category": "Prompt Engineering",
+      "tags": ["safety", "privacy", "risk"],
+      "summary": "Checks a prompt or plan for sensitive data, unsafe actions, and missing authorization.",
+      "body": "Review this prompt or plan for safety.\n\nContent:\n{content}\n\nCheck for:\n- Sensitive personal data\n- Secrets or credentials\n- Unsafe code or commands\n- Destructive actions\n- Missing authorization\n\nReturn:\n1. Risk level: low, medium, or high\n2. Findings\n3. Safer rewrite\n4. Questions to ask before proceeding",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
     {
       "id": "seed-executive-summary",
       "title": "Executive summary builder",
       "category": "Business",
-      "tags": [
-        "summary",
-        "strategy"
-      ],
+      "tags": ["summary", "strategy"],
       "summary": "Turns long notes into a concise executive summary with decisions and risks.",
-      "body": "Create an executive summary for {audience} from the notes below. Include context, key findings, risks, recommended next actions, and open questions.\n\nNotes:\n{source_notes}",
+      "body": "Create an executive summary for {audience} from the notes below.\n\nDesired length: {desired_length}\nDecision context: {decision_context}\n\nInclude:\n- Context\n- Key findings\n- Decisions\n- Risks\n- Recommended next actions\n- Open questions\n\nNotes:\n{source_notes}",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-decision-memo",
+      "title": "Decision memo",
+      "category": "Business",
+      "tags": ["decision", "memo", "strategy"],
+      "summary": "Creates a practical memo for choosing between options.",
+      "body": "Write a decision memo for {audience}.\n\nDecision:\n{decision}\n\nOptions:\n{options}\n\nCriteria:\n{criteria}\n\nConstraints:\n{constraints}\n\nReturn:\n## Recommendation\n## Why now\n## Option comparison\n## Risks\n## Next steps",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-research-synthesis",
+      "title": "Research synthesis",
+      "category": "Research",
+      "tags": ["research", "evidence", "summary"],
+      "summary": "Synthesizes sources into an answer, evidence table, confidence, and open questions.",
+      "body": "Answer this research question:\n{research_question}\n\nScope:\n{scope}\nTime period:\n{time_period}\n\nSources:\n\"\"\"\n{sources}\n\"\"\"\n\nReturn:\n1. Short answer\n2. Evidence table with source, claim, and relevance\n3. Confidence level\n4. Unknowns or weak evidence\n5. Follow-up questions",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-literature-notes",
+      "title": "Literature notes extractor",
+      "category": "Research",
+      "tags": ["research", "notes", "extraction"],
+      "summary": "Extracts clean research notes from papers, articles, or reports.",
+      "body": "Extract research notes from this source.\n\nSource:\n\"\"\"\n{source_text}\n\"\"\"\n\nReturn:\n- Main question\n- Method or approach\n- Key findings\n- Evidence quality\n- Limitations\n- Useful quotes or facts\n- How this relates to {research_goal}",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-data-extraction-json",
+      "title": "Data extraction to JSON",
+      "category": "Data",
+      "tags": ["json", "extraction", "schema"],
+      "summary": "Extracts structured data with a strict schema and clear missing-value rule.",
+      "body": "Extract data from the source text into valid JSON.\n\nSchema:\n{schema}\n\nRules:\n- Return only valid JSON.\n- Do not invent missing fields.\n- Use {empty_value_rule} for missing values.\n- Follow these examples if provided:\n{examples}\n\nSource text:\n\"\"\"\n{source_text}\n\"\"\"",
       "createdAt": "2026-05-31T00:00:00.000Z",
       "updatedAt": "2026-05-31T00:00:00.000Z",
       "history": []
@@ -24,12 +145,53 @@
       "id": "seed-safe-code-review",
       "title": "Safe code review",
       "category": "Coding",
-      "tags": [
-        "review",
-        "security"
-      ],
+      "tags": ["review", "security"],
       "summary": "Reviews a code diff for correctness, safety, regressions, and missing tests.",
-      "body": "Review this {language} change. Prioritize security issues, data loss, regressions, and missing tests. Return findings first with file and line references.\n\nDiff:\n{diff}",
+      "body": "Review this {language} change.\n\nFile path:\n{file_path}\nRisk tolerance:\n{risk_tolerance}\n\nPrioritize security issues, data loss, regressions, and missing tests. Return findings first with file and line references.\n\nDiff:\n{diff}",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-test-case-generator",
+      "title": "Test case generator",
+      "category": "Coding",
+      "tags": ["tests", "quality", "edge-cases"],
+      "summary": "Creates focused test cases from behavior, risks, and edge cases.",
+      "body": "Create test cases for this feature.\n\nFeature behavior:\n{feature_behavior}\n\nKnown risks:\n{known_risks}\n\nCode or API shape:\n{code_or_api}\n\nReturn:\n- Critical tests\n- Edge cases\n- Regression tests\n- Test data\n- Gaps that need clarification",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-writing-revision",
+      "title": "Audience-focused rewrite",
+      "category": "Writing",
+      "tags": ["rewrite", "tone", "audience"],
+      "summary": "Rewrites text for a target audience and tone while preserving facts.",
+      "body": "Rewrite this draft for {audience} using a {tone} tone.\n\nStyle reference:\n{style_reference}\n\nConstraints:\n- Preserve facts.\n- Make unclear parts easier to understand.\n- Do not add unsupported claims.\n\nDraft:\n{draft}\n\nReturn:\n1. Revised draft\n2. Short note explaining major changes",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-prompt-improver",
+      "title": "Prompt improver",
+      "category": "Prompt Engineering",
+      "tags": ["prompt", "improvement", "template"],
+      "summary": "Improves a rough prompt using role, context, constraints, examples, and output format.",
+      "body": "Improve this prompt so it is clearer and more reliable.\n\nRough prompt:\n{rough_prompt}\n\nUser goal:\n{user_goal}\n\nTask context:\n{context}\n\nImprove it by adding:\n- Clear task goal\n- Useful role or expertise\n- Needed context\n- Constraints\n- Output format\n- Placeholders\n- Safety or quality checks\n\nReturn:\n1. Improved prompt\n2. Why it is better\n3. Optional variables to fill",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-meeting-action-summary",
+      "title": "Meeting action summary",
+      "category": "Business",
+      "tags": ["meeting", "summary", "actions"],
+      "summary": "Turns meeting notes into decisions, owners, due dates, and open questions.",
+      "body": "Summarize this meeting for {audience}.\n\nNotes:\n{meeting_notes}\n\nReturn:\n| Item | Owner | Due date | Status |\n|---|---|---|---|\n\nAlso include:\n- Decisions made\n- Risks or blockers\n- Open questions\n- Follow-up message draft",
       "createdAt": "2026-05-31T00:00:00.000Z",
       "updatedAt": "2026-05-31T00:00:00.000Z",
       "history": []

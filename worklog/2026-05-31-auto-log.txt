@@ -94,3 +94,6 @@ Removed the duplicate All row from Categories and made Overview the only all-pro
 [2026-05-31T14:43:08.561Z] DONE - Clarify empty category behavior
 Empty categories now show a dedicated empty state with New prompt and Remove empty category actions. Removed category row controls, separate expand buttons, and the redundant audit badge.
 
+[2026-05-31T14:49:18.937Z] DONE - Add prompt engineering starter library
+Added 17 practical starter prompts based on the research knowledge base and added a one-time merge so existing local users receive the new library without losing saved prompts.
+
