@@ -34,6 +34,7 @@ const els = {
   placeholderList: document.querySelector("#placeholderList"),
   auditScore: document.querySelector("#auditScore"),
   auditBadge: document.querySelector("#auditBadge"),
+  auditBreakdown: document.querySelector("#auditBreakdown"),
   auditFindings: document.querySelector("#auditFindings"),
   auditTabScore: document.querySelector("#auditTabScore"),
   historyList: document.querySelector("#historyList"),
@@ -399,9 +400,43 @@ function renderAudit(prompt) {
   els.auditBadge.className = `audit-badge ${audit.level === "low" ? "" : audit.level}`;
   els.auditTabScore.textContent = audit.score;
   els.auditTabScore.className = audit.level === "low" ? "" : audit.level;
+  renderAuditBreakdown(audit);
   els.auditFindings.innerHTML = audit.findings.length
     ? audit.findings.map((finding) => `<li class="${finding.level === "high" ? "high" : finding.level === "medium" ? "warn" : ""}">${escapeHtml(finding.message)}</li>`).join("")
     : "<li>No safety findings detected.</li>";
+}
+
+function renderAuditBreakdown(audit) {
+  const riskPenaltyText = audit.breakdown.riskPenaltyTotal ? `-${audit.breakdown.riskPenaltyTotal}` : "0";
+  const qualityPenaltyText = audit.breakdown.qualityPenaltyTotal ? `-${audit.breakdown.qualityPenaltyTotal}` : "0";
+  const riskDetails = audit.breakdown.riskPenalties.length
+    ? audit.breakdown.riskPenalties.map((penalty) => `<span>-${penalty.points} ${escapeHtml(penalty.label)}</span>`).join("")
+    : "<span>No risk penalty</span>";
+  const qualityDetails = audit.breakdown.qualityPenalties.length
+    ? audit.breakdown.qualityPenalties.map((penalty) => `<span>-${penalty.points} ${escapeHtml(penalty.label)}</span>`).join("")
+    : "<span>No quality penalty</span>";
+  els.auditBreakdown.innerHTML = `
+    <div class="score-card">
+      <span>Base</span>
+      <strong>${audit.breakdown.base}</strong>
+      <small>Starting score</small>
+    </div>
+    <div class="score-card ${audit.breakdown.riskPenaltyTotal ? "warn" : ""}">
+      <span>Risk penalty</span>
+      <strong>${riskPenaltyText}</strong>
+      <small>${riskDetails}</small>
+    </div>
+    <div class="score-card ${audit.breakdown.qualityPenaltyTotal ? "warn" : ""}">
+      <span>Quality penalty</span>
+      <strong>${qualityPenaltyText}</strong>
+      <small>${qualityDetails}</small>
+    </div>
+    <div class="score-card final ${audit.level}">
+      <span>Final</span>
+      <strong>${audit.breakdown.final}</strong>
+      <small>${audit.level} risk level</small>
+    </div>
+  `;
 }
 
 function renderHistory(prompt) {

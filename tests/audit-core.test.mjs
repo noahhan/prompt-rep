@@ -30,3 +30,17 @@ test("audit core detects reusable placeholders", async () => {
 
   assert.deepEqual(Array.from(audit.getPlaceholders("Use {topic} for {audience}. Then reuse {topic}.")), ["topic", "audience"]);
 });
+
+test("audit core explains score calculation", async () => {
+  const audit = await loadAuditCore();
+  const result = audit.auditPrompt({
+    title: "Minimal",
+    summary: "",
+    body: "Summarize this text."
+  });
+
+  assert.equal(result.breakdown.base, 100);
+  assert.deepEqual(Array.from(result.breakdown.riskPenalties), []);
+  assert.deepEqual(Array.from(result.breakdown.qualityPenalties).map((item) => item.points), [8, 4]);
+  assert.equal(result.breakdown.final, 88);
+});

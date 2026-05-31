@@ -46,3 +46,6 @@ Restored the prompt sort control to the normal dropdown menu and removed the ext
 [2026-05-31T11:00:40.977Z] DONE - Convert audit to editor tab
 Changed audit and history from a separate drawer/button into editor tabs: Prompt, Audit, and History. Kept Prompt as default and restored the normal sort dropdown.
 
+[2026-05-31T11:09:49.057Z] DONE - Add audit score breakdown
+Added score calculation cards in the Audit tab showing base score, risk penalty, quality penalty, and final score.
+

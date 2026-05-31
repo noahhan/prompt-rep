@@ -41,9 +41,18 @@
     const findings = rules.filter((rule) => new RegExp(rule.pattern).test(text));
     const missingSummary = String(prompt.summary || "").trim().length < 20;
     const missingVariables = getPlaceholders(prompt.body).length === 0;
-    let score = 100 - findings.reduce((sum, finding) => sum + finding.weight, 0);
-    if (missingSummary) score -= 8;
-    if (missingVariables) score -= 4;
+    const riskPenalties = findings.map((finding) => ({
+      label: finding.message,
+      level: finding.level,
+      points: finding.weight
+    }));
+    const qualityPenalties = [
+      ...(missingSummary ? [{ label: "Executive summary is short or missing.", level: "medium", points: 8 }] : []),
+      ...(missingVariables ? [{ label: "No reusable {placeholder} variables detected.", level: "low", points: 4 }] : [])
+    ];
+    const riskPenaltyTotal = riskPenalties.reduce((sum, penalty) => sum + penalty.points, 0);
+    const qualityPenaltyTotal = qualityPenalties.reduce((sum, penalty) => sum + penalty.points, 0);
+    let score = 100 - riskPenaltyTotal - qualityPenaltyTotal;
     score = Math.max(0, score);
     return {
       score,
@@ -52,7 +61,15 @@
         ...findings,
         ...(missingSummary ? [{ level: "medium", message: "Executive summary is short or missing." }] : []),
         ...(missingVariables ? [{ level: "low", message: "No reusable {placeholder} variables detected." }] : [])
-      ]
+      ],
+      breakdown: {
+        base: 100,
+        riskPenalties,
+        qualityPenalties,
+        riskPenaltyTotal,
+        qualityPenaltyTotal,
+        final: score
+      }
     };
   }
 
