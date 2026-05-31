@@ -135,6 +135,7 @@ let hasUnsavedChanges = false;
 let categoryFormOpen = false;
 let activeEditorTab = "prompt";
 let activeBodyView = "markdown";
+const expandedCategories = new Set([state.prompts[0]?.category].filter(Boolean));
 
 function makeSeedState() {
   const now = new Date().toISOString();
@@ -262,12 +263,29 @@ function renderCategories() {
     .map((category) => {
       const count = category === "All" ? state.prompts.length : counts.get(category) || 0;
       const canDelete = category !== "All" && count === 0;
-      return `<div class="nav-row">
-        <button class="nav-item ${category === selectedCategory ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
-          <span>${escapeHtml(category)}</span>
-          <span>${count}</span>
-        </button>
+      const isExpanded = expandedCategories.has(category);
+      const categoryPrompts = getPromptsForCategory(category);
+      const promptLinks = isExpanded && categoryPrompts.length
+        ? `<div class="category-children">
+            ${categoryPrompts
+              .map((prompt) => `<button class="category-prompt ${prompt.id === selectedId ? "active" : ""}" type="button" data-prompt-id="${prompt.id}">
+                <span>${escapeHtml(prompt.title || "Untitled prompt")}</span>
+              </button>`)
+              .join("")}
+          </div>`
+        : "";
+      return `<div class="category-node">
+        <div class="nav-row">
+          <button class="category-expand ${isExpanded ? "expanded" : ""}" type="button" data-toggle-category="${escapeHtml(category)}" aria-label="${isExpanded ? "Collapse" : "Expand"} ${escapeHtml(category)}">
+            <span aria-hidden="true">&gt;</span>
+          </button>
+          <button class="nav-item ${category === selectedCategory ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
+            <span>${escapeHtml(category)}</span>
+            <span>${count}</span>
+          </button>
         ${canDelete ? `<button class="category-delete" type="button" data-delete-category="${escapeHtml(category)}" title="Delete empty category" aria-label="Delete ${escapeHtml(category)} category"><span data-icon="trash"></span></button>` : ""}
+        </div>
+        ${promptLinks}
       </div>`;
     })
     .join("");
@@ -275,6 +293,11 @@ function renderCategories() {
     ...editableCategories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`),
     '<option value="__new__">+ Add new category...</option>'
   ].join("");
+}
+
+function getPromptsForCategory(category) {
+  const prompts = category === "All" ? state.prompts : state.prompts.filter((prompt) => prompt.category === category);
+  return [...prompts].sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function renderTags() {
@@ -309,32 +332,18 @@ function renderPromptList() {
         .map((prompt) => {
           const audit = auditPrompt(prompt);
           const risk = audit.level === "low" ? "Low" : audit.level === "medium" ? "Med" : "High";
-          const placeholderCount = getPlaceholders(prompt.body).length;
-          const summary = prompt.summary || prompt.body || "No summary yet.";
           const updated = formatDate(prompt.updatedAt);
           const category = prompt.category || "Uncategorized";
-          const categoryInitial = category.trim().charAt(0).toUpperCase() || "P";
-          const tags = prompt.tags.length ? prompt.tags.map((tag) => `<span class="mini-tag">${escapeHtml(tag)}</span>`).join("") : '<span class="mini-tag muted-tag">No tags</span>';
           return `<button class="prompt-card ${audit.level} ${prompt.id === selectedId ? "active" : ""}" type="button" data-prompt-id="${prompt.id}">
             <div class="prompt-card-main">
-              <div class="card-topline">
-                <span class="category-token" aria-hidden="true">${escapeHtml(categoryInitial)}</span>
-                <span class="category-pill"><span class="category-dot ${audit.level}"></span>${escapeHtml(category)}</span>
-                <span class="risk ${audit.level}">${risk} risk</span>
-              </div>
               <div class="card-title-row">
                 <h4>${escapeHtml(prompt.title || "Untitled prompt")}</h4>
-                <span class="updated-time">${updated}</span>
+                <span class="risk ${audit.level}">${risk}</span>
               </div>
-              <p>${escapeHtml(summary)}</p>
-              <div class="card-metrics" aria-label="Prompt metadata">
-                <span><strong>${audit.score}</strong> audit</span>
-                <span><strong>${placeholderCount}</strong> variables</span>
-                <span><strong>${prompt.history.length}</strong> versions</span>
-              </div>
-              <div class="card-footer">
-                <div class="tag-row">${tags}</div>
-                <span class="variable-count">{ } ${placeholderCount}</span>
+              <div class="compact-meta">
+                <span>${escapeHtml(category)}</span>
+                <span>${updated}</span>
+                <span>${audit.score} audit</span>
               </div>
             </div>
           </button>`;
@@ -383,7 +392,7 @@ function renderEditor() {
   els.summaryInput.value = prompt.summary;
   els.bodyInput.value = prompt.body;
   renderPromptPreview(prompt.body);
-  if (els.guideTaskSelect.options.length) {
+  if (els.guideTaskSelect?.options.length) {
     els.guideTaskSelect.value = String(guessGuideIndex(prompt));
   }
   renderPlaceholders(prompt);
@@ -1087,8 +1096,8 @@ els.searchInput.addEventListener("input", renderPromptList);
 els.sortSelect.addEventListener("change", renderPromptList);
 els.exportJsonButton.addEventListener("click", exportJson);
 els.exportMdButton.addEventListener("click", exportMarkdown);
-els.guideTaskSelect.addEventListener("change", renderGuide);
-els.insertGuideButton.addEventListener("click", insertGuideScaffold);
+els.guideTaskSelect?.addEventListener("change", renderGuide);
+els.insertGuideButton?.addEventListener("click", insertGuideScaffold);
 els.confirmImportButton.addEventListener("click", confirmImportPreview);
 els.cancelImportButton.addEventListener("click", closeImportPreview);
 els.cancelImportTextButton.addEventListener("click", closeImportPreview);
@@ -1132,6 +1141,18 @@ els.categorySelect.addEventListener("change", () => {
 });
 
 document.addEventListener("click", (event) => {
+  const toggleCategoryButton = event.target.closest("[data-toggle-category]");
+  if (toggleCategoryButton) {
+    const category = toggleCategoryButton.dataset.toggleCategory;
+    if (expandedCategories.has(category)) {
+      expandedCategories.delete(category);
+    } else {
+      expandedCategories.add(category);
+    }
+    renderCategories();
+    renderIcons();
+    return;
+  }
   const deleteCategoryButton = event.target.closest("[data-delete-category]");
   if (deleteCategoryButton) {
     deleteCategory(deleteCategoryButton.dataset.deleteCategory);
@@ -1143,6 +1164,7 @@ document.addEventListener("click", (event) => {
     draftPrompt = null;
     hasUnsavedChanges = false;
     selectedCategory = categoryButton.dataset.category;
+    expandedCategories.add(selectedCategory);
     selectedTag = null;
     selectFirstVisiblePrompt();
     render();

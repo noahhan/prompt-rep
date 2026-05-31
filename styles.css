@@ -248,13 +248,40 @@ button {
 }
 
 .prompt-list {
-  gap: 12px;
+  gap: 8px;
 }
 
 .nav-row {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.category-node {
+  display: grid;
+  gap: 5px;
+}
+
+.category-expand {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.category-expand span {
+  transition: transform 120ms ease;
+}
+
+.category-expand.expanded span {
+  transform: rotate(90deg);
 }
 
 .nav-item {
@@ -323,6 +350,37 @@ button {
 .nav-item span:last-child {
   color: var(--muted);
   font-size: 12px;
+}
+
+.category-children {
+  display: grid;
+  gap: 4px;
+  margin-left: 34px;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+.category-prompt {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 9px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-prompt:hover,
+.category-prompt.active {
+  border-color: var(--line);
+  background: #fff;
+  color: var(--text);
 }
 
 .tag-cloud,
@@ -497,20 +555,20 @@ select:focus {
   display: block;
   width: 100%;
   overflow: hidden;
-  border: 1px solid #cfdae2;
-  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  border-radius: 8px;
   background: #fff;
   padding: 0;
   text-align: left;
   transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03), 0 10px 20px rgba(15, 23, 42, 0.04);
+  box-shadow: none;
 }
 
 .prompt-card:hover,
 .prompt-card.active {
   border-color: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+  transform: none;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
 .prompt-card.active {
@@ -537,9 +595,9 @@ select:focus {
 
 .prompt-card-main {
   display: grid;
-  gap: 11px;
+  gap: 6px;
   min-width: 0;
-  padding: 15px 14px 14px;
+  padding: 11px 12px;
 }
 
 .card-topline,
@@ -569,7 +627,7 @@ select:focus {
 .prompt-card h4 {
   margin: 0;
   color: #111827;
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1.3;
 }
 
@@ -592,6 +650,29 @@ select:focus {
   line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.compact-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.compact-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-meta span:not(:last-child)::after {
+  margin-left: 7px;
+  color: #c2cbd3;
+  content: "/";
 }
 
 .card-metrics {

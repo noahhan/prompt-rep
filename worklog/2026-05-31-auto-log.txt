@@ -67,3 +67,6 @@ Added Markdown and Preview tabs below Prompt body so users can edit raw prompt t
 [2026-05-31T13:18:37.640Z] DONE - Support prompt preview tables
 Added Markdown table rendering to the Prompt body Preview tab and verified Korean table content renders as a real table.
 
+[2026-05-31T13:24:37.685Z] DONE - Simplify prompt navigation
+Removed the Prompt guide section, added expandable category prompt lists in the left menu, and made the center prompt list more compact.
+
