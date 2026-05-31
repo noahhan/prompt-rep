@@ -695,6 +695,22 @@ label {
   gap: 10px;
 }
 
+.guide-placeholders {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #dbe4ea;
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.guide-placeholders strong {
+  color: var(--text);
+}
+
 .guide-chips {
   display: flex;
   flex-wrap: wrap;
@@ -712,6 +728,116 @@ label {
   padding: 0 9px;
   font-size: 12px;
   font-weight: 800;
+}
+
+.template-preview {
+  max-height: 170px;
+  overflow: auto;
+  margin: 0;
+  border: 1px solid #dbe4ea;
+  border-radius: var(--radius);
+  background: #fbfdfe;
+  color: #1f2937;
+  padding: 12px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.34);
+  padding: 20px;
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.modal {
+  display: grid;
+  gap: 16px;
+  width: min(620px, 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 18px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+}
+
+.modal-head,
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.modal h2,
+.modal p {
+  margin: 0;
+}
+
+.modal h2 {
+  font-size: 20px;
+}
+
+.modal p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.import-preview-body {
+  display: grid;
+  gap: 13px;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.preview-grid span {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #dbe4ea;
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.preview-grid strong {
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.preview-list {
+  display: grid;
+  gap: 8px;
+}
+
+.preview-list div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.preview-list span {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .placeholder-panel h3 {

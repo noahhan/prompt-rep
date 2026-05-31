@@ -153,15 +153,16 @@
               <section class="guide-panel" aria-label="Prompt engineering guide">
                 <div class="panel-head">
                   <div>
-                    <h3>Prompt guide</h3>
-                    <p>Choose a task type to see useful prompt patterns.</p>
+                    <h3>Prompt guide & template library</h3>
+                    <p>Choose a task. Then insert a ready-made prompt template.</p>
                   </div>
                   <select id="guideTaskSelect" aria-label="Prompt guide task type"></select>
                 </div>
                 <div id="guidePatternList" class="guide-pattern-list"></div>
+                <pre id="guideTemplatePreview" class="template-preview"></pre>
                 <button id="insertGuideButton" class="button ghost" type="button">
                   <span data-icon="plus"></span>
-                  Insert scaffold
+                  Insert template
                 </button>
               </section>
             </form>
@@ -199,6 +200,28 @@
         <p>Create a new prompt or choose one from the repository.</p>
       </div>
     </template>
+
+    <div id="importPreviewModal" class="modal-backdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="importPreviewTitle">
+        <div class="modal-head">
+          <div>
+            <h2 id="importPreviewTitle">Import preview</h2>
+            <p>Review this file before adding prompts.</p>
+          </div>
+          <button id="cancelImportButton" class="icon-button" type="button" aria-label="Cancel import">
+            <span data-icon="trash"></span>
+          </button>
+        </div>
+        <div id="importPreviewBody" class="import-preview-body"></div>
+        <div class="modal-actions">
+          <button id="cancelImportTextButton" class="button ghost" type="button">Cancel</button>
+          <button id="confirmImportButton" class="button primary" type="button">
+            <span data-icon="upload"></span>
+            Import prompts
+          </button>
+        </div>
+      </section>
+    </div>
 
     <script src="./app.js"></script>
   </body>

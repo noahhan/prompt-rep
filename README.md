@@ -19,3 +19,6 @@ Then visit `http://localhost:8000`.
 - No network or backend is required.
 - Data stays in the current browser profile until exported or cleared.
 - JSON exports preserve history. Markdown exports are portable summaries of the current prompts.
+- When served locally, the app can load starter prompts from `data/prompts.json`.
+- Template metadata is stored in `data/templates.json`.
+- For Git sync later, export JSON and replace `data/prompts.json` with the exported prompt data.

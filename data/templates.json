@@ -1,0 +1,76 @@
+{
+  "templates": [
+    {
+      "task": "Executive summary",
+      "patterns": [
+        "Persona",
+        "Context block",
+        "Output format",
+        "Check"
+      ],
+      "placeholders": [
+        "role",
+        "audience",
+        "source_notes",
+        "desired_length"
+      ]
+    },
+    {
+      "task": "Code review",
+      "patterns": [
+        "Persona",
+        "Rubric",
+        "Severity",
+        "Safety"
+      ],
+      "placeholders": [
+        "language",
+        "diff"
+      ]
+    },
+    {
+      "task": "Research synthesis",
+      "patterns": [
+        "Context block",
+        "Evidence",
+        "Uncertainty",
+        "Format"
+      ],
+      "placeholders": [
+        "research_question",
+        "sources",
+        "answer_length"
+      ]
+    },
+    {
+      "task": "Data extraction",
+      "patterns": [
+        "Few-shot",
+        "Schema",
+        "Delimiter",
+        "Validation"
+      ],
+      "placeholders": [
+        "schema",
+        "examples",
+        "source_text"
+      ]
+    },
+    {
+      "task": "Writing and editing",
+      "patterns": [
+        "Persona",
+        "Audience",
+        "Tone",
+        "Examples"
+      ],
+      "placeholders": [
+        "audience",
+        "communication_goal",
+        "tone",
+        "style_reference",
+        "draft"
+      ]
+    }
+  ]
+}

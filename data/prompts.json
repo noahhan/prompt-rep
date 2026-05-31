@@ -1,0 +1,38 @@
+{
+  "categories": [
+    "Writing",
+    "Research",
+    "Coding",
+    "Business"
+  ],
+  "prompts": [
+    {
+      "id": "seed-executive-summary",
+      "title": "Executive summary builder",
+      "category": "Business",
+      "tags": [
+        "summary",
+        "strategy"
+      ],
+      "summary": "Turns long notes into a concise executive summary with decisions and risks.",
+      "body": "Create an executive summary for {audience} from the notes below. Include context, key findings, risks, recommended next actions, and open questions.\n\nNotes:\n{source_notes}",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    },
+    {
+      "id": "seed-safe-code-review",
+      "title": "Safe code review",
+      "category": "Coding",
+      "tags": [
+        "review",
+        "security"
+      ],
+      "summary": "Reviews a code diff for correctness, safety, regressions, and missing tests.",
+      "body": "Review this {language} change. Prioritize security issues, data loss, regressions, and missing tests. Return findings first with file and line references.\n\nDiff:\n{diff}",
+      "createdAt": "2026-05-31T00:00:00.000Z",
+      "updatedAt": "2026-05-31T00:00:00.000Z",
+      "history": []
+    }
+  ]
+}

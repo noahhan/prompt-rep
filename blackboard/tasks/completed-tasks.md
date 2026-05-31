@@ -13,3 +13,7 @@
 - Added text worklog.
 - Published to public GitHub repository.
 - Added Agent Blackboard.
+- Added `data/prompts.json`.
+- Added prompt template library metadata.
+- Added import preview.
+- Improved prompt guide UI.

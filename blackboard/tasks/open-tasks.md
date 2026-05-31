@@ -2,9 +2,7 @@
 
 ## High Priority
 
-- Add real file-based prompt storage, such as `data/prompts.json`.
 - Add Git sync plan or command workflow.
-- Improve prompt guide visibility in the app.
 
 ## Medium Priority
 

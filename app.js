@@ -45,13 +45,20 @@ const els = {
   exportMdButton: document.querySelector("#exportMdButton"),
   guideTaskSelect: document.querySelector("#guideTaskSelect"),
   guidePatternList: document.querySelector("#guidePatternList"),
-  insertGuideButton: document.querySelector("#insertGuideButton")
+  guideTemplatePreview: document.querySelector("#guideTemplatePreview"),
+  insertGuideButton: document.querySelector("#insertGuideButton"),
+  importPreviewModal: document.querySelector("#importPreviewModal"),
+  importPreviewBody: document.querySelector("#importPreviewBody"),
+  confirmImportButton: document.querySelector("#confirmImportButton"),
+  cancelImportButton: document.querySelector("#cancelImportButton"),
+  cancelImportTextButton: document.querySelector("#cancelImportTextButton")
 };
 
 const promptGuide = [
   {
     task: "Executive summary",
     patterns: ["Persona", "Context block", "Output format", "Check"],
+    placeholders: ["role", "audience", "source_notes", "desired_length"],
     guidance: "Use this when you need a short decision-ready summary.",
     scaffold:
       "You are a {role}. Prepare an executive summary for {audience}.\n\nContext:\n\"\"\"\n{source_notes}\n\"\"\"\n\nReturn:\n## Summary\n- {desired_length} concise bullets\n\n## Key decisions\n- Decision, reason, owner\n\n## Risks\n- Risk, impact, mitigation\n\n## Next actions\n- Action, owner, due date\n\nThink privately. Return only the structured answer and key assumptions."
@@ -59,6 +66,7 @@ const promptGuide = [
   {
     task: "Code review",
     patterns: ["Persona", "Rubric", "Severity", "Safety"],
+    placeholders: ["language", "diff"],
     guidance: "Use this when you need bugs, risks, and missing tests.",
     scaffold:
       "You are a senior {language} engineer.\n\nReview this diff:\n```diff\n{diff}\n```\n\nCheck:\n- Correctness\n- Security and privacy\n- Data loss\n- Performance\n- Missing tests\n\nReturn findings first, ordered by severity. Include file and line when possible."
@@ -66,6 +74,7 @@ const promptGuide = [
   {
     task: "Research synthesis",
     patterns: ["Context block", "Evidence", "Uncertainty", "Format"],
+    placeholders: ["research_question", "sources", "answer_length"],
     guidance: "Use this when you need an answer based on sources.",
     scaffold:
       "Answer this question: {research_question}\n\nSources:\n\"\"\"\n{sources}\n\"\"\"\n\nReturn:\n## Answer\n{answer_length}\n\n## Evidence table\n| Claim | Evidence | Source | Confidence |\n\n## Uncertainty\n- List gaps, conflicts, and assumptions.\n\nUse only the sources unless you clearly label outside knowledge."
@@ -73,6 +82,7 @@ const promptGuide = [
   {
     task: "Data extraction",
     patterns: ["Few-shot", "Schema", "Delimiter", "Validation"],
+    placeholders: ["schema", "examples", "source_text"],
     guidance: "Use this when you need clean JSON or table output.",
     scaffold:
       "Extract data into this schema:\n```json\n{schema}\n```\n\nRules:\n- Use null for missing values.\n- Do not invent fields.\n- Preserve source wording.\n\nExamples:\n{examples}\n\nText:\n\"\"\"\n{source_text}\n\"\"\"\n\nReturn valid JSON only."
@@ -80,17 +90,19 @@ const promptGuide = [
   {
     task: "Writing and editing",
     patterns: ["Persona", "Audience", "Tone", "Examples"],
+    placeholders: ["audience", "communication_goal", "tone", "style_reference", "draft"],
     guidance: "Use this when style, reader, and tone matter.",
     scaffold:
       "You are an editor writing for {audience}.\n\nGoal: {communication_goal}\nTone: {tone}\n\nStyle reference:\n\"\"\"\n{style_reference}\n\"\"\"\n\nDraft:\n\"\"\"\n{draft}\n\"\"\"\n\nRevise the draft. Keep the facts. Return the revised version and a short change note."
   }
 ];
 
-let state = loadState();
+let state = loadState() || makeSeedState();
 let selectedId = state.prompts[0]?.id || null;
 let selectedCategory = "All";
 let selectedTag = null;
 let selectedVersionIndex = null;
+let pendingImportPrompts = [];
 
 function makeSeedState() {
   const now = new Date().toISOString();
@@ -126,14 +138,32 @@ function makeSeedState() {
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return makeSeedState();
+    if (!raw) return null;
     const parsed = JSON.parse(raw);
     return {
       categories: Array.isArray(parsed.categories) ? parsed.categories : [],
       prompts: Array.isArray(parsed.prompts) ? parsed.prompts : []
     };
   } catch {
-    return makeSeedState();
+    return null;
+  }
+}
+
+async function loadDataFileIfEmpty() {
+  try {
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    const response = await fetch("./data/prompts.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const data = await response.json();
+    const prompts = Array.isArray(data.prompts) ? data.prompts : [];
+    if (!prompts.length) return;
+    state = {
+      categories: Array.isArray(data.categories) ? data.categories : [...new Set(prompts.map((prompt) => prompt.category).filter(Boolean))],
+      prompts
+    };
+    selectedId = state.prompts[0]?.id || null;
+  } catch {
+    // Direct file opening cannot fetch local JSON. Seed data is used instead.
   }
 }
 
@@ -488,7 +518,12 @@ function renderGuide() {
     <div class="guide-chips">
       ${item.patterns.map((pattern) => `<span>${escapeHtml(pattern)}</span>`).join("")}
     </div>
+    <div class="guide-placeholders">
+      <strong>Useful placeholders</strong>
+      <span>${item.placeholders.map((name) => `{${escapeHtml(name)}}`).join(" ")}</span>
+    </div>
   `;
+  els.guideTemplatePreview.textContent = item.scaffold;
 }
 
 function insertGuideScaffold() {
@@ -519,17 +554,8 @@ function importFile(file) {
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const text = String(reader.result || "");
-      if (file.name.endsWith(".json")) {
-        const imported = JSON.parse(text);
-        const prompts = Array.isArray(imported.prompts) ? imported.prompts : Array.isArray(imported) ? imported : [];
-        mergePrompts(prompts);
-      } else {
-        mergePrompts(parseMarkdownPrompts(text));
-      }
-      selectedCategory = "All";
-      selectedTag = null;
-      render();
+      pendingImportPrompts = parseImportText(String(reader.result || ""), file.name);
+      showImportPreview(file.name, pendingImportPrompts);
     } catch (error) {
       alert(`Import failed: ${error.message}`);
     }
@@ -537,24 +563,83 @@ function importFile(file) {
   reader.readAsText(file);
 }
 
+function parseImportText(text, filename) {
+  if (filename.endsWith(".json")) {
+    const imported = JSON.parse(text);
+    return Array.isArray(imported.prompts) ? imported.prompts : Array.isArray(imported) ? imported : [];
+  }
+  return parseMarkdownPrompts(text);
+}
+
+function showImportPreview(filename, prompts) {
+  if (!prompts.length) {
+    alert("No prompts found in this file.");
+    return;
+  }
+  const existingTitles = new Set(state.prompts.map((prompt) => prompt.title.trim().toLowerCase()));
+  const duplicates = prompts.filter((prompt) => existingTitles.has(String(prompt.title || "").trim().toLowerCase())).length;
+  const categories = [...new Set(prompts.map((prompt) => prompt.category || "Imported"))];
+  const highRisk = prompts.filter((prompt) => auditPrompt(normalizePrompt(prompt)).level === "high").length;
+  els.importPreviewBody.innerHTML = `
+    <div class="preview-grid">
+      <span><strong>${prompts.length}</strong> prompts</span>
+      <span><strong>${categories.length}</strong> categories</span>
+      <span><strong>${duplicates}</strong> duplicates</span>
+      <span><strong>${highRisk}</strong> high risk</span>
+    </div>
+    <p><strong>File:</strong> ${escapeHtml(filename)}</p>
+    <p><strong>Categories:</strong> ${categories.map(escapeHtml).join(", ")}</p>
+    <div class="preview-list">
+      ${prompts
+        .slice(0, 5)
+        .map((prompt) => {
+          const normalized = normalizePrompt(prompt);
+          const audit = auditPrompt(normalized);
+          return `<div><strong>${escapeHtml(normalized.title)}</strong><span>${escapeHtml(normalized.category)} · ${audit.score} audit score</span></div>`;
+        })
+        .join("")}
+    </div>
+  `;
+  els.importPreviewModal.hidden = false;
+  renderIcons(els.importPreviewModal);
+}
+
+function closeImportPreview() {
+  pendingImportPrompts = [];
+  els.importPreviewModal.hidden = true;
+}
+
+function confirmImportPreview() {
+  mergePrompts(pendingImportPrompts);
+  pendingImportPrompts = [];
+  selectedCategory = "All";
+  selectedTag = null;
+  els.importPreviewModal.hidden = true;
+  render();
+}
+
 function mergePrompts(prompts) {
   const now = new Date().toISOString();
   prompts.forEach((item) => {
-    const prompt = {
-      id: crypto.randomUUID(),
-      title: item.title || "Imported prompt",
-      category: item.category || "Imported",
-      tags: Array.isArray(item.tags) ? item.tags : normalizeTags(String(item.tags || "")),
-      summary: item.summary || "",
-      body: item.body || item.prompt || "",
-      createdAt: item.createdAt || now,
-      updatedAt: item.updatedAt || now,
-      history: Array.isArray(item.history) ? item.history : []
-    };
+    const prompt = normalizePrompt(item, now);
     ensureCategory(prompt.category);
     state.prompts.unshift(prompt);
     selectedId = prompt.id;
   });
+}
+
+function normalizePrompt(item, now = new Date().toISOString()) {
+  return {
+    id: item.id || crypto.randomUUID(),
+    title: item.title || "Imported prompt",
+    category: item.category || "Imported",
+    tags: Array.isArray(item.tags) ? item.tags : normalizeTags(String(item.tags || "")),
+    summary: item.summary || "",
+    body: item.body || item.prompt || "",
+    createdAt: item.createdAt || now,
+    updatedAt: item.updatedAt || now,
+    history: Array.isArray(item.history) ? item.history : []
+  };
 }
 
 function parseMarkdownPrompts(text) {
@@ -600,6 +685,9 @@ els.exportJsonButton.addEventListener("click", exportJson);
 els.exportMdButton.addEventListener("click", exportMarkdown);
 els.guideTaskSelect.addEventListener("change", renderGuide);
 els.insertGuideButton.addEventListener("click", insertGuideScaffold);
+els.confirmImportButton.addEventListener("click", confirmImportPreview);
+els.cancelImportButton.addEventListener("click", closeImportPreview);
+els.cancelImportTextButton.addEventListener("click", closeImportPreview);
 els.importButton.addEventListener("click", () => els.importFile.click());
 els.importFile.addEventListener("change", (event) => {
   const [file] = event.target.files;
@@ -654,4 +742,9 @@ document.addEventListener("click", (event) => {
   }
 });
 
-render();
+async function initApp() {
+  await loadDataFileIfEmpty();
+  render();
+}
+
+initApp();

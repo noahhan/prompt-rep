@@ -13,3 +13,6 @@ Checked ignored files and secret patterns, improved list UI, merged remote READM
 [2026-05-31T09:04:09.335Z] DONE - Add agent blackboard
 Created shared blackboard folder for agent context, perspectives, decisions, notes, and tasks.
 
+[2026-05-31T09:20:16.084Z] DONE - Add data files and import preview
+Added data/prompts.json, data/templates.json, import preview modal, stronger guide UI, and template insertion support.
+
