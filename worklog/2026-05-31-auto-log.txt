@@ -97,3 +97,8 @@ Empty categories now show a dedicated empty state with New prompt and Remove emp
 [2026-05-31T14:49:18.937Z] DONE - Add prompt engineering starter library
 Added 17 practical starter prompts based on the research knowledge base and added a one-time merge so existing local users receive the new library without losing saved prompts.
 
+[2026-05-31T14:54:50.505Z] DONE - Remove Overview icon
+Removed the icon from the Overview menu row and adjusted spacing so the left menu stays clean.
+
+[2026-05-31T14:55:52.360Z] DONE - Align Overview menu typography
+Matched the Overview menu font, size, count styling, and position with the Categories title for better left-menu consistency.

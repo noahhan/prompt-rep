@@ -220,38 +220,38 @@ button {
 .overview-link {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  min-height: 42px;
   border: 0;
-  border-left: 3px solid transparent;
+  border-left: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--text);
-  padding: 0 8px 0 10px;
+  color: var(--muted);
+  padding: 0;
   text-align: left;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   transition: 120ms ease;
 }
 
 .overview-link:hover,
 .overview-link.active {
-  border-left-color: var(--accent);
   background: transparent;
   color: var(--accent-strong);
 }
 
 .overview-link strong {
-  display: inline-grid;
-  place-items: center;
-  min-width: 26px;
-  height: 24px;
+  display: inline;
+  min-width: 0;
+  height: auto;
   margin-left: auto;
   border-radius: 0;
   background: transparent;
   color: var(--muted);
   font-size: 11px;
+  font-weight: 800;
 }
 
 .overview-link.active strong {
