@@ -12,7 +12,8 @@ const icons = {
   "wifi-off": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m2 2 20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 5-2.7M14 10.4A10 10 0 0 1 19 13"/><path d="M2 8.8a15 15 0 0 1 6.3-3M12 5a15 15 0 0 1 10 3.8"/><path d="M12 20h.01"/></svg>',
   save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>'
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 16h6v6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 8h-6V2"/></svg>'
 };
 
 const els = {
@@ -37,6 +38,7 @@ const els = {
   auditBreakdown: document.querySelector("#auditBreakdown"),
   auditDetails: document.querySelector("#auditDetails"),
   auditFindings: document.querySelector("#auditFindings"),
+  refreshAuditButton: document.querySelector("#refreshAuditButton"),
   auditTabScore: document.querySelector("#auditTabScore"),
   historyList: document.querySelector("#historyList"),
   restoreButton: document.querySelector("#restoreButton"),
@@ -406,6 +408,21 @@ function renderAudit(prompt) {
   els.auditFindings.innerHTML = audit.findings.length
     ? audit.findings.map((finding) => `<li class="${finding.level === "high" ? "high" : finding.level === "medium" ? "warn" : ""}">${escapeHtml(finding.message)}</li>`).join("")
     : "<li>No safety findings detected.</li>";
+}
+
+function getEditorPromptDraft() {
+  return {
+    title: els.titleInput.value,
+    category: getEditorCategory(),
+    tags: normalizeTags(els.tagsInput.value),
+    summary: els.summaryInput.value,
+    body: els.bodyInput.value
+  };
+}
+
+function refreshAuditFromEditor() {
+  renderAudit(getEditorPromptDraft());
+  renderIcons();
 }
 
 function renderAuditBreakdown(audit) {
@@ -884,6 +901,7 @@ els.cancelCategoryButton.addEventListener("click", closeCategoryForm);
 els.form.addEventListener("submit", saveCurrentPrompt);
 els.duplicateButton.addEventListener("click", duplicatePrompt);
 els.deleteButton.addEventListener("click", deletePrompt);
+els.refreshAuditButton.addEventListener("click", refreshAuditFromEditor);
 els.restoreButton.addEventListener("click", restoreVersion);
 els.searchInput.addEventListener("input", renderPromptList);
 els.sortSelect.addEventListener("change", renderPromptList);
@@ -913,15 +931,7 @@ els.importFile.addEventListener("change", (event) => {
 
 [els.bodyInput, els.summaryInput, els.titleInput, els.categorySelect, els.categoryCustomInput, els.tagsInput].forEach((input) => {
   input.addEventListener("input", () => {
-    const prompt = {
-      title: els.titleInput.value,
-      category: getEditorCategory(),
-      tags: normalizeTags(els.tagsInput.value),
-      summary: els.summaryInput.value,
-      body: els.bodyInput.value
-    };
-    renderPlaceholders(prompt);
-    renderAudit(prompt);
+    renderPlaceholders(getEditorPromptDraft());
     markEditorDirty();
     renderIcons();
   });

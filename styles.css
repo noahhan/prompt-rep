@@ -1089,6 +1089,12 @@ code {
   color: var(--red);
 }
 
+.audit-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .score-ring {
   display: grid;
   place-items: center;

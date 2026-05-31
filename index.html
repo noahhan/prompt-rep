@@ -190,7 +190,12 @@
                 <section class="audit-panel">
                 <div class="panel-head">
                   <h3>Safety audit</h3>
-                  <span id="auditBadge" class="audit-badge">Clean</span>
+                  <div class="audit-actions">
+                    <button id="refreshAuditButton" class="icon-button" type="button" title="Refresh audit" aria-label="Refresh audit">
+                      <span data-icon="refresh"></span>
+                    </button>
+                    <span id="auditBadge" class="audit-badge">Clean</span>
+                  </div>
                 </div>
                 <div class="score-ring">
                   <strong id="auditScore">100</strong>

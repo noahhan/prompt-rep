@@ -55,3 +55,6 @@ Added quality checks, improvement suggestions, reusable placeholders, and export
 [2026-05-31T12:54:23.219Z] DONE - Clarify audit score factors
 Renamed quality checks to rule-based structure checks and added visible R1-R5 and S1-S4 score indexes in the Audit tab.
 
+[2026-05-31T13:01:29.937Z] DONE - Add manual audit refresh
+Added an Audit tab refresh icon and changed audit recalculation to happen on refresh or save instead of every keystroke.
+
