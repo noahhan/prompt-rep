@@ -85,3 +85,9 @@ Adjusted font sizes and weights across the editor, overview, tabs, labels, and a
 [2026-05-31T14:14:36.452Z] DONE - Flatten editor and menu controls
 Removed the audit tab icon and score badge, softened Save into a flat action, and removed rounded-box styling from left menu rows.
 
+[2026-05-31T14:17:42.498Z] DONE - Simplify action icons
+Changed Save to an icon-only action, removed the refresh button border, and replaced trash-can delete icons with simple x icons.
+
+[2026-05-31T14:23:44.887Z] DONE - Remove All category
+Removed the duplicate All row from Categories and made Overview the only all-prompts view. Category selection now only uses real categories.
+

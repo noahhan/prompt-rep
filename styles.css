@@ -892,24 +892,18 @@ label {
   flex: 0 0 auto;
 }
 
-.editor-actions .button.primary {
-  min-width: 82px;
-  min-height: 34px;
-  border-color: transparent;
-  background: transparent;
-  color: var(--accent-strong);
-  padding: 0 11px;
-}
-
 .editor-actions .icon-button {
   border-color: transparent;
   background: transparent;
 }
 
-.editor-actions .button.primary:hover,
 .editor-actions .icon-button:hover {
   border-color: var(--line);
   background: var(--panel);
+  color: var(--accent-strong);
+}
+
+.editor-actions .save-action {
   color: var(--accent-strong);
 }
 
@@ -1317,6 +1311,17 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.audit-actions .icon-button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.audit-actions .icon-button:hover {
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent-strong);
 }
 
 .score-ring {

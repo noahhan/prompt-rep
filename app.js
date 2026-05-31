@@ -14,7 +14,6 @@ const icons = {
   "wifi-off": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m2 2 20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 5-2.7M14 10.4A10 10 0 0 1 19 13"/><path d="M2 8.8a15 15 0 0 1 6.3-3M12 5a15 15 0 0 1 10 3.8"/><path d="M12 20h.01"/></svg>',
   save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
   refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 16h6v6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 8h-6V2"/></svg>'
 };
 
@@ -81,7 +80,7 @@ const importCore = window.PromptVaultImport;
 
 let state = loadState() || makeSeedState();
 let selectedId = state.prompts[0]?.id || null;
-let selectedCategory = "All";
+let selectedCategory = state.prompts[0]?.category || state.categories[0] || null;
 let selectedTag = null;
 let selectedVersionIndex = null;
 let pendingImportPrompts = [];
@@ -221,13 +220,13 @@ function renderCategories() {
   const totalCounts = new Map();
   state.prompts.forEach((prompt) => totalCounts.set(prompt.category, (totalCounts.get(prompt.category) || 0) + 1));
   state.prompts.filter(matchesSearchAndTag).forEach((prompt) => counts.set(prompt.category, (counts.get(prompt.category) || 0) + 1));
-  const categories = ["All", ...state.categories.filter(Boolean).sort()];
+  const categories = state.categories.filter(Boolean).sort();
   const editableCategories = state.categories.filter(Boolean).sort();
   els.categoryForm.hidden = !categoryFormOpen;
   els.categoryList.innerHTML = categories
     .map((category) => {
-      const count = category === "All" ? state.prompts.filter(matchesSearchAndTag).length : counts.get(category) || 0;
-      const canDelete = category !== "All" && (totalCounts.get(category) || 0) === 0;
+      const count = counts.get(category) || 0;
+      const canDelete = (totalCounts.get(category) || 0) === 0;
       const isExpanded = expandedCategories.has(category);
       const categoryPrompts = getPromptsForCategory(category);
       const promptLinks = isExpanded && categoryPrompts.length
@@ -248,7 +247,7 @@ function renderCategories() {
             <span>${escapeHtml(category)}</span>
             <span>${count}</span>
           </button>
-        ${canDelete ? `<button class="category-delete" type="button" data-delete-category="${escapeHtml(category)}" title="Delete empty category" aria-label="Delete ${escapeHtml(category)} category"><span data-icon="trash"></span></button>` : ""}
+        ${canDelete ? `<button class="category-delete" type="button" data-delete-category="${escapeHtml(category)}" title="Delete empty category" aria-label="Delete ${escapeHtml(category)} category"><span data-icon="x"></span></button>` : ""}
         </div>
         ${promptLinks}
       </div>`;
@@ -311,7 +310,7 @@ function renderOverviewCard(prompt) {
 }
 
 function getPromptsForCategory(category) {
-  const prompts = (category === "All" ? state.prompts : state.prompts.filter((prompt) => prompt.category === category)).filter(matchesSearchAndTag);
+  const prompts = (category ? state.prompts.filter((prompt) => prompt.category === category) : state.prompts).filter(matchesSearchAndTag);
   return [...prompts].sort((a, b) => a.title.localeCompare(b.title));
 }
 
@@ -634,7 +633,7 @@ function createPrompt() {
   draftPrompt = {
     id: "__draft__",
     title: "Untitled prompt",
-    category: selectedCategory === "All" ? "Writing" : selectedCategory,
+    category: selectedCategory || state.categories[0] || "Writing",
     tags: [],
     summary: "",
     body: "Use this prompt for {task}.\n\nContext:\n{context}\n\nOutput format:\n{format}",
@@ -678,7 +677,7 @@ function saveCurrentPrompt(event) {
   }
   hasUnsavedChanges = false;
   ensureCategory(prompt.category);
-  selectedCategory = selectedCategory === "All" ? "All" : prompt.category;
+  selectedCategory = prompt.category;
   workspaceView = "editor";
   if (selectedTag && !prompt.tags.includes(selectedTag)) selectedTag = null;
   selectedVersionIndex = null;
@@ -845,12 +844,12 @@ function saveNewCategory(event) {
 }
 
 function deleteCategory(category) {
-  if (!category || category === "All") return;
+  if (!category) return;
   const count = state.prompts.filter((prompt) => prompt.category === category).length;
   if (count > 0) return;
   state.categories = state.categories.filter((item) => item !== category);
   if (selectedCategory === category) {
-    selectedCategory = "All";
+    selectedCategory = state.categories[0] || null;
     selectFirstVisiblePrompt();
   }
   saveState();
@@ -957,7 +956,7 @@ function closeImportPreview() {
 function confirmImportPreview() {
   mergePrompts(pendingImportPrompts);
   pendingImportPrompts = [];
-  selectedCategory = "All";
+  selectedCategory = null;
   selectedTag = null;
   els.importPreviewModal.hidden = true;
   saveState();
@@ -1029,6 +1028,7 @@ els.overviewButton.addEventListener("click", () => {
   draftPrompt = null;
   hasUnsavedChanges = false;
   workspaceView = "overview";
+  selectedCategory = null;
   activeEditorTab = "prompt";
   render();
 });
@@ -1117,7 +1117,7 @@ document.addEventListener("click", (event) => {
     draftPrompt = null;
     hasUnsavedChanges = false;
     selectedTag = selectedTag === tagButton.dataset.tag ? null : tagButton.dataset.tag;
-    selectedCategory = "All";
+    selectedCategory = null;
     selectFirstVisiblePrompt();
     workspaceView = "editor";
     render();
