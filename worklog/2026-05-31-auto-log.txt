@@ -64,3 +64,6 @@ Replaced the native browser delete confirm box with a styled in-app modal and ve
 [2026-05-31T13:13:57.238Z] DONE - Add prompt body preview
 Added Markdown and Preview tabs below Prompt body so users can edit raw prompt text or inspect a rendered human-readable view.
 
+[2026-05-31T13:18:37.640Z] DONE - Support prompt preview tables
+Added Markdown table rendering to the Prompt body Preview tab and verified Korean table content renders as a real table.
+

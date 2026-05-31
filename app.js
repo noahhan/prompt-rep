@@ -445,8 +445,13 @@ function renderPromptMarkdown(markdown) {
     blocks.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
     code = [];
   };
+  const flushTextBlocks = () => {
+    flushParagraph();
+    flushList();
+  };
 
-  lines.forEach((line) => {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
     if (line.trim().startsWith("```")) {
       if (inCode) {
         flushCode();
@@ -456,16 +461,23 @@ function renderPromptMarkdown(markdown) {
         flushList();
         inCode = true;
       }
-      return;
+      continue;
     }
     if (inCode) {
       code.push(line);
-      return;
+      continue;
     }
     if (!line.trim()) {
       flushParagraph();
       flushList();
-      return;
+      continue;
+    }
+    if (isMarkdownTableStart(lines, index)) {
+      flushTextBlocks();
+      const table = collectMarkdownTable(lines, index);
+      blocks.push(renderMarkdownTable(table.rows));
+      index = table.endIndex;
+      continue;
     }
     const heading = line.match(/^(#{1,3})\s+(.+)$/);
     if (heading) {
@@ -473,21 +485,67 @@ function renderPromptMarkdown(markdown) {
       flushList();
       const level = heading[1].length + 2;
       blocks.push(`<h${level}>${formatInlineMarkdown(heading[2])}</h${level}>`);
-      return;
+      continue;
     }
     const listItem = line.match(/^\s*[-*]\s+(.+)$/);
     if (listItem) {
       flushParagraph();
       list.push(listItem[1]);
-      return;
+      continue;
     }
     flushList();
     paragraph.push(line.trim());
-  });
+  }
   if (inCode) flushCode();
   flushParagraph();
   flushList();
   return blocks.join("");
+}
+
+function isMarkdownTableStart(lines, index) {
+  return isMarkdownTableRow(lines[index]) && isMarkdownTableDivider(lines[index + 1]);
+}
+
+function collectMarkdownTable(lines, startIndex) {
+  const rows = [parseMarkdownTableRow(lines[startIndex])];
+  let index = startIndex + 2;
+  while (index < lines.length && isMarkdownTableRow(lines[index])) {
+    rows.push(parseMarkdownTableRow(lines[index]));
+    index += 1;
+  }
+  return { rows, endIndex: index - 1 };
+}
+
+function isMarkdownTableRow(line) {
+  const trimmed = String(line || "").trim();
+  return trimmed.startsWith("|") && trimmed.endsWith("|") && trimmed.split("|").length > 3;
+}
+
+function isMarkdownTableDivider(line) {
+  if (!isMarkdownTableRow(line)) return false;
+  return parseMarkdownTableRow(line).every((cell) => /^:?-{3,}:?$/.test(cell.trim()));
+}
+
+function parseMarkdownTableRow(line) {
+  return String(line || "")
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function renderMarkdownTable(rows) {
+  if (!rows.length) return "";
+  const [header, ...body] = rows;
+  return `
+    <div class="preview-table-wrap">
+      <table>
+        <thead><tr>${header.map((cell) => `<th>${formatInlineMarkdown(cell)}</th>`).join("")}</tr></thead>
+        <tbody>${body.map((row) => `<tr>${row.map((cell) => `<td>${formatInlineMarkdown(cell)}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table>
+    </div>
+  `;
 }
 
 function formatInlineMarkdown(value) {
