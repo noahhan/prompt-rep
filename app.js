@@ -32,6 +32,9 @@ const els = {
   tagsInput: document.querySelector("#tagsInput"),
   summaryInput: document.querySelector("#summaryInput"),
   bodyInput: document.querySelector("#bodyInput"),
+  bodyViewButtons: document.querySelectorAll("[data-body-view]"),
+  bodyMarkdownPanel: document.querySelector("#bodyMarkdownPanel"),
+  bodyPreviewPanel: document.querySelector("#bodyPreviewPanel"),
   placeholderList: document.querySelector("#placeholderList"),
   auditScore: document.querySelector("#auditScore"),
   auditBadge: document.querySelector("#auditBadge"),
@@ -63,6 +66,11 @@ const els = {
   confirmImportButton: document.querySelector("#confirmImportButton"),
   cancelImportButton: document.querySelector("#cancelImportButton"),
   cancelImportTextButton: document.querySelector("#cancelImportTextButton"),
+  deletePromptModal: document.querySelector("#deletePromptModal"),
+  deletePromptName: document.querySelector("#deletePromptName"),
+  confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
+  cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
+  cancelDeleteTextButton: document.querySelector("#cancelDeleteTextButton"),
   editorTabButtons: document.querySelectorAll("[data-editor-tab]"),
   promptTabPanel: document.querySelector("#promptTabPanel"),
   auditTabPanel: document.querySelector("#auditTabPanel"),
@@ -121,10 +129,12 @@ let selectedCategory = "All";
 let selectedTag = null;
 let selectedVersionIndex = null;
 let pendingImportPrompts = [];
+let pendingDeletePromptId = null;
 let draftPrompt = null;
 let hasUnsavedChanges = false;
 let categoryFormOpen = false;
 let activeEditorTab = "prompt";
+let activeBodyView = "markdown";
 
 function makeSeedState() {
   const now = new Date().toISOString();
@@ -222,6 +232,7 @@ function render() {
   renderEditor();
   renderGuide();
   renderEditorTabs();
+  renderPromptBodyTabs();
   renderIcons();
 }
 
@@ -371,6 +382,7 @@ function renderEditor() {
   els.tagsInput.value = prompt.tags.join(", ");
   els.summaryInput.value = prompt.summary;
   els.bodyInput.value = prompt.body;
+  renderPromptPreview(prompt.body);
   if (els.guideTaskSelect.options.length) {
     els.guideTaskSelect.value = String(guessGuideIndex(prompt));
   }
@@ -393,6 +405,95 @@ function renderPlaceholders(prompt) {
   els.placeholderList.innerHTML = placeholders.length
     ? placeholders.map((name) => `<span class="placeholder-chip">{${escapeHtml(name)}}</span>`).join("")
     : '<span class="placeholder-chip">No variables</span>';
+}
+
+function renderPromptPreview(markdown) {
+  const html = renderPromptMarkdown(markdown);
+  els.bodyPreviewPanel.innerHTML = html || '<p class="preview-empty">No prompt body yet.</p>';
+}
+
+function renderPromptBodyTabs() {
+  els.bodyViewButtons.forEach((button) => {
+    const isActive = button.dataset.bodyView === activeBodyView;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+  els.bodyMarkdownPanel.hidden = activeBodyView !== "markdown";
+  els.bodyPreviewPanel.hidden = activeBodyView !== "preview";
+  if (activeBodyView === "preview") renderPromptPreview(els.bodyInput.value);
+}
+
+function renderPromptMarkdown(markdown) {
+  const lines = String(markdown || "").split(/\r?\n/);
+  const blocks = [];
+  let paragraph = [];
+  let list = [];
+  let code = [];
+  let inCode = false;
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return;
+    blocks.push(`<p>${formatInlineMarkdown(paragraph.join(" "))}</p>`);
+    paragraph = [];
+  };
+  const flushList = () => {
+    if (!list.length) return;
+    blocks.push(`<ul>${list.map((item) => `<li>${formatInlineMarkdown(item)}</li>`).join("")}</ul>`);
+    list = [];
+  };
+  const flushCode = () => {
+    blocks.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+    code = [];
+  };
+
+  lines.forEach((line) => {
+    if (line.trim().startsWith("```")) {
+      if (inCode) {
+        flushCode();
+        inCode = false;
+      } else {
+        flushParagraph();
+        flushList();
+        inCode = true;
+      }
+      return;
+    }
+    if (inCode) {
+      code.push(line);
+      return;
+    }
+    if (!line.trim()) {
+      flushParagraph();
+      flushList();
+      return;
+    }
+    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      const level = heading[1].length + 2;
+      blocks.push(`<h${level}>${formatInlineMarkdown(heading[2])}</h${level}>`);
+      return;
+    }
+    const listItem = line.match(/^\s*[-*]\s+(.+)$/);
+    if (listItem) {
+      flushParagraph();
+      list.push(listItem[1]);
+      return;
+    }
+    flushList();
+    paragraph.push(line.trim());
+  });
+  if (inCode) flushCode();
+  flushParagraph();
+  flushList();
+  return blocks.join("");
+}
+
+function formatInlineMarkdown(value) {
+  return escapeHtml(value)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
 function renderAudit(prompt) {
@@ -593,11 +694,29 @@ function deletePrompt() {
     render();
     return;
   }
-  const confirmed = confirm(`Delete "${prompt.title}"? This only removes it from local storage.`);
-  if (!confirmed) return;
-  state.prompts = state.prompts.filter((item) => item.id !== prompt.id);
+  openDeletePromptModal(prompt);
+}
+
+function openDeletePromptModal(prompt) {
+  pendingDeletePromptId = prompt.id;
+  els.deletePromptName.textContent = prompt.title || "Untitled prompt";
+  els.deletePromptModal.hidden = false;
+  renderIcons(els.deletePromptModal);
+  els.confirmDeleteButton.focus();
+}
+
+function closeDeletePromptModal() {
+  pendingDeletePromptId = null;
+  els.deletePromptModal.hidden = true;
+}
+
+function confirmDeletePrompt() {
+  if (!pendingDeletePromptId) return;
+  state.prompts = state.prompts.filter((item) => item.id !== pendingDeletePromptId);
   selectedId = state.prompts[0]?.id || null;
   selectedVersionIndex = null;
+  pendingDeletePromptId = null;
+  els.deletePromptModal.hidden = true;
   saveState();
   render();
 }
@@ -766,7 +885,7 @@ function insertGuideScaffold() {
     body: els.bodyInput.value
   };
   renderPlaceholders(draft);
-  renderAudit(draft);
+  renderPromptPreview(draft.body);
   markEditorDirty();
   els.bodyInput.focus();
 }
@@ -901,6 +1020,9 @@ els.cancelCategoryButton.addEventListener("click", closeCategoryForm);
 els.form.addEventListener("submit", saveCurrentPrompt);
 els.duplicateButton.addEventListener("click", duplicatePrompt);
 els.deleteButton.addEventListener("click", deletePrompt);
+els.confirmDeleteButton.addEventListener("click", confirmDeletePrompt);
+els.cancelDeleteButton.addEventListener("click", closeDeletePromptModal);
+els.cancelDeleteTextButton.addEventListener("click", closeDeletePromptModal);
 els.refreshAuditButton.addEventListener("click", refreshAuditFromEditor);
 els.restoreButton.addEventListener("click", restoreVersion);
 els.searchInput.addEventListener("input", renderPromptList);
@@ -919,6 +1041,12 @@ els.editorTabButtons.forEach((button) => {
     renderIcons();
   });
 });
+els.bodyViewButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    activeBodyView = button.dataset.bodyView;
+    renderPromptBodyTabs();
+  });
+});
 els.importButton.addEventListener("click", () => {
   if (!confirmRepositoryAction("Import adds prompts to saved data. Unsaved changes will not be included. Continue?")) return;
   els.importFile.click();
@@ -932,6 +1060,7 @@ els.importFile.addEventListener("change", (event) => {
 [els.bodyInput, els.summaryInput, els.titleInput, els.categorySelect, els.categoryCustomInput, els.tagsInput].forEach((input) => {
   input.addEventListener("input", () => {
     renderPlaceholders(getEditorPromptDraft());
+    renderPromptPreview(els.bodyInput.value);
     markEditorDirty();
     renderIcons();
   });

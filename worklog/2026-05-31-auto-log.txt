@@ -58,3 +58,9 @@ Renamed quality checks to rule-based structure checks and added visible R1-R5 an
 [2026-05-31T13:01:29.937Z] DONE - Add manual audit refresh
 Added an Audit tab refresh icon and changed audit recalculation to happen on refresh or save instead of every keystroke.
 
+[2026-05-31T13:09:37.754Z] DONE - Improve delete confirmation
+Replaced the native browser delete confirm box with a styled in-app modal and verified Cancel keeps prompts unchanged.
+
+[2026-05-31T13:13:57.238Z] DONE - Add prompt body preview
+Added Markdown and Preview tabs below Prompt body so users can edit raw prompt text or inspect a rendered human-readable view.
+

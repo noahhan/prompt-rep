@@ -156,10 +156,19 @@
                   <textarea id="summaryInput" rows="3" placeholder="One or two lines explaining when to use this prompt."></textarea>
                 </label>
 
-                <label class="stacked prompt-body-label">
-                  Prompt body
-                  <textarea id="bodyInput" rows="14" spellcheck="true"></textarea>
-                </label>
+                <section class="prompt-body-panel" aria-label="Prompt body">
+                  <div class="prompt-body-head">
+                    <label for="bodyInput">Prompt body</label>
+                    <div class="body-view-tabs" role="tablist" aria-label="Prompt body view">
+                      <button id="bodyMarkdownTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="bodyMarkdownPanel" data-body-view="markdown">Markdown</button>
+                      <button id="bodyPreviewTab" type="button" role="tab" aria-selected="false" aria-controls="bodyPreviewPanel" data-body-view="preview">Preview</button>
+                    </div>
+                  </div>
+                  <div id="bodyMarkdownPanel" class="body-view-panel" role="tabpanel" aria-labelledby="bodyMarkdownTab">
+                    <textarea id="bodyInput" rows="14" spellcheck="true"></textarea>
+                  </div>
+                  <div id="bodyPreviewPanel" class="body-view-panel prompt-preview" role="tabpanel" aria-labelledby="bodyPreviewTab" hidden></div>
+                </section>
 
                 <div class="placeholder-panel">
                   <div>
@@ -247,6 +256,34 @@
           <button id="confirmImportButton" class="button primary" type="button">
             <span data-icon="upload"></span>
             Import prompts
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div id="deletePromptModal" class="modal-backdrop" hidden>
+      <section class="modal delete-modal" role="dialog" aria-modal="true" aria-labelledby="deletePromptTitle">
+        <div class="modal-head">
+          <div>
+            <h2 id="deletePromptTitle">Delete prompt?</h2>
+            <p>This prompt will be removed from local storage.</p>
+          </div>
+          <button id="cancelDeleteButton" class="icon-button" type="button" aria-label="Cancel delete">
+            <span data-icon="x"></span>
+          </button>
+        </div>
+        <div class="delete-summary">
+          <span data-icon="trash"></span>
+          <div>
+            <strong id="deletePromptName">Untitled prompt</strong>
+            <p>This action cannot be undone.</p>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="cancelDeleteTextButton" class="button ghost" type="button">Cancel</button>
+          <button id="confirmDeleteButton" class="button danger" type="button">
+            <span data-icon="trash"></span>
+            Delete prompt
           </button>
         </div>
       </section>
