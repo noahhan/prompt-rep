@@ -115,10 +115,6 @@
                   <p id="editorStatus" class="editor-status"></p>
                 </div>
                 <div class="editor-actions">
-                  <button id="inspectorToggleButton" class="button ghost" type="button" aria-expanded="false" aria-controls="inspectorPanel">
-                    <span data-icon="shield"></span>
-                    Audit
-                  </button>
                   <button id="duplicateButton" class="icon-button" type="button" title="Duplicate prompt" aria-label="Duplicate prompt">
                     <span data-icon="copy"></span>
                   </button>
@@ -132,64 +128,66 @@
                 </div>
               </div>
 
-              <div class="meta-grid">
-                <label>
-                  Category
-                  <select id="categorySelect"></select>
-                  <input id="categoryCustomInput" class="category-custom" type="text" placeholder="New category name" autocomplete="off" hidden />
-                </label>
-                <label>
-                  Tags
-                  <input id="tagsInput" type="text" placeholder="writing, research, coding" autocomplete="off" />
-                </label>
+              <div class="editor-tabs" role="tablist" aria-label="Prompt details">
+                <button id="promptTabButton" class="active" type="button" role="tab" aria-selected="true" aria-controls="promptTabPanel" data-editor-tab="prompt">Prompt</button>
+                <button id="auditTabButton" type="button" role="tab" aria-selected="false" aria-controls="auditTabPanel" data-editor-tab="audit">
+                  <span data-icon="shield"></span>
+                  Audit
+                  <strong id="auditTabScore">100</strong>
+                </button>
+                <button id="historyTabButton" type="button" role="tab" aria-selected="false" aria-controls="historyTabPanel" data-editor-tab="history">History</button>
               </div>
 
-              <label class="stacked">
-                Executive summary
-                <textarea id="summaryInput" rows="3" placeholder="One or two lines explaining when to use this prompt."></textarea>
-              </label>
-
-              <label class="stacked prompt-body-label">
-                Prompt body
-                <textarea id="bodyInput" rows="14" spellcheck="true"></textarea>
-              </label>
-
-              <div class="placeholder-panel">
-                <div>
-                  <h3>Reusable placeholders</h3>
-                  <p>Variables are detected from <code>{name}</code> expressions.</p>
+              <section id="promptTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="promptTabButton">
+                <div class="meta-grid">
+                  <label>
+                    Category
+                    <select id="categorySelect"></select>
+                    <input id="categoryCustomInput" class="category-custom" type="text" placeholder="New category name" autocomplete="off" hidden />
+                  </label>
+                  <label>
+                    Tags
+                    <input id="tagsInput" type="text" placeholder="writing, research, coding" autocomplete="off" />
+                  </label>
                 </div>
-                <div id="placeholderList" class="placeholder-list"></div>
-              </div>
 
-              <section class="guide-panel" aria-label="Prompt engineering guide">
-                <div class="panel-head">
+                <label class="stacked">
+                  Executive summary
+                  <textarea id="summaryInput" rows="3" placeholder="One or two lines explaining when to use this prompt."></textarea>
+                </label>
+
+                <label class="stacked prompt-body-label">
+                  Prompt body
+                  <textarea id="bodyInput" rows="14" spellcheck="true"></textarea>
+                </label>
+
+                <div class="placeholder-panel">
                   <div>
-                    <h3>Prompt guide & template library</h3>
-                    <p>Choose a task. Then insert a ready-made prompt template.</p>
+                    <h3>Reusable placeholders</h3>
+                    <p>Variables are detected from <code>{name}</code> expressions.</p>
                   </div>
-                  <select id="guideTaskSelect" aria-label="Prompt guide task type"></select>
+                  <div id="placeholderList" class="placeholder-list"></div>
                 </div>
-                <div id="guidePatternList" class="guide-pattern-list"></div>
-                <pre id="guideTemplatePreview" class="template-preview"></pre>
-                <button id="insertGuideButton" class="button ghost" type="button">
-                  <span data-icon="plus"></span>
-                  Insert template
-                </button>
-              </section>
-            </form>
 
-            <aside id="inspectorPanel" class="inspector" aria-label="Safety and history" hidden>
-              <div class="inspector-head">
-                <div>
-                  <h3>Audit menu</h3>
-                  <p>Safety and history</p>
-                </div>
-                <button id="closeInspectorButton" class="icon-button" type="button" aria-label="Close audit menu">
-                  <span data-icon="x"></span>
-                </button>
-              </div>
-              <section class="audit-panel">
+                <section class="guide-panel" aria-label="Prompt engineering guide">
+                  <div class="panel-head">
+                    <div>
+                      <h3>Prompt guide & template library</h3>
+                      <p>Choose a task. Then insert a ready-made prompt template.</p>
+                    </div>
+                    <select id="guideTaskSelect" aria-label="Prompt guide task type"></select>
+                  </div>
+                  <div id="guidePatternList" class="guide-pattern-list"></div>
+                  <pre id="guideTemplatePreview" class="template-preview"></pre>
+                  <button id="insertGuideButton" class="button ghost" type="button">
+                    <span data-icon="plus"></span>
+                    Insert template
+                  </button>
+                </section>
+              </section>
+
+              <section id="auditTabPanel" class="tab-panel audit-tab-panel" role="tabpanel" aria-labelledby="auditTabButton" hidden>
+                <section class="audit-panel">
                 <div class="panel-head">
                   <h3>Safety audit</h3>
                   <span id="auditBadge" class="audit-badge">Clean</span>
@@ -200,15 +198,18 @@
                 </div>
                 <ul id="auditFindings" class="audit-findings"></ul>
               </section>
+              </section>
 
-              <section class="history-panel">
+              <section id="historyTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="historyTabButton" hidden>
+                <section class="history-panel">
                 <div class="panel-head">
                   <h3>Version history</h3>
                   <button id="restoreButton" class="button compact" type="button" disabled>Restore</button>
                 </div>
                 <div id="historyList" class="history-list"></div>
               </section>
-            </aside>
+              </section>
+            </form>
           </section>
         </section>
       </main>

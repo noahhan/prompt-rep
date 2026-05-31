@@ -43,3 +43,6 @@ Checked Gemini technical review and converted the main engineering risks into ac
 [2026-05-31T10:54:46.717Z] DONE - Restore prompt sort dropdown
 Restored the prompt sort control to the normal dropdown menu and removed the extra styled wrapper.
 
+[2026-05-31T11:00:40.977Z] DONE - Convert audit to editor tab
+Changed audit and history from a separate drawer/button into editor tabs: Prompt, Audit, and History. Kept Prompt as default and restored the normal sort dropdown.
+

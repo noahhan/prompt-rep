@@ -35,9 +35,7 @@ const els = {
   auditScore: document.querySelector("#auditScore"),
   auditBadge: document.querySelector("#auditBadge"),
   auditFindings: document.querySelector("#auditFindings"),
-  inspectorPanel: document.querySelector("#inspectorPanel"),
-  inspectorToggleButton: document.querySelector("#inspectorToggleButton"),
-  closeInspectorButton: document.querySelector("#closeInspectorButton"),
+  auditTabScore: document.querySelector("#auditTabScore"),
   historyList: document.querySelector("#historyList"),
   restoreButton: document.querySelector("#restoreButton"),
   storageStatus: document.querySelector("#storageStatus"),
@@ -60,7 +58,11 @@ const els = {
   importPreviewBody: document.querySelector("#importPreviewBody"),
   confirmImportButton: document.querySelector("#confirmImportButton"),
   cancelImportButton: document.querySelector("#cancelImportButton"),
-  cancelImportTextButton: document.querySelector("#cancelImportTextButton")
+  cancelImportTextButton: document.querySelector("#cancelImportTextButton"),
+  editorTabButtons: document.querySelectorAll("[data-editor-tab]"),
+  promptTabPanel: document.querySelector("#promptTabPanel"),
+  auditTabPanel: document.querySelector("#auditTabPanel"),
+  historyTabPanel: document.querySelector("#historyTabPanel")
 };
 
 const { auditPrompt, getPlaceholders } = window.PromptVaultAudit;
@@ -118,7 +120,7 @@ let pendingImportPrompts = [];
 let draftPrompt = null;
 let hasUnsavedChanges = false;
 let categoryFormOpen = false;
-let inspectorOpen = false;
+let activeEditorTab = "prompt";
 
 function makeSeedState() {
   const now = new Date().toISOString();
@@ -215,16 +217,24 @@ function render() {
   renderPromptList();
   renderEditor();
   renderGuide();
-  renderInspectorState();
+  renderEditorTabs();
   renderIcons();
 }
 
-function renderInspectorState() {
-  els.inspectorPanel.hidden = !inspectorOpen;
-  els.inspectorPanel.classList.toggle("open", inspectorOpen);
-  els.inspectorPanel.parentElement.classList.toggle("inspector-open", inspectorOpen);
-  els.inspectorToggleButton.setAttribute("aria-expanded", String(inspectorOpen));
-  els.inspectorToggleButton.classList.toggle("active", inspectorOpen);
+function renderEditorTabs() {
+  const panels = {
+    prompt: els.promptTabPanel,
+    audit: els.auditTabPanel,
+    history: els.historyTabPanel
+  };
+  els.editorTabButtons.forEach((button) => {
+    const isActive = button.dataset.editorTab === activeEditorTab;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+  Object.entries(panels).forEach(([name, panel]) => {
+    panel.hidden = name !== activeEditorTab;
+  });
 }
 
 function renderCategories() {
@@ -341,11 +351,9 @@ function renderEditor() {
     els.form.querySelectorAll("input, textarea, select, button").forEach((node) => {
       if (node.id !== "newPromptButton") node.disabled = true;
     });
-    els.inspectorToggleButton.disabled = true;
     return;
   }
   els.form.querySelectorAll("input, textarea, select, button").forEach((node) => (node.disabled = false));
-  els.inspectorToggleButton.disabled = false;
   const isDraft = selectedId === "__draft__";
   els.titleInput.value = prompt.title;
   els.editorStatus.textContent = isDraft ? "Draft - not saved yet" : "Saved prompt";
@@ -389,8 +397,8 @@ function renderAudit(prompt) {
   els.auditScore.parentElement.className = `score-ring ${audit.level}`;
   els.auditBadge.textContent = audit.level === "low" ? "Clean" : audit.level === "medium" ? "Review" : "Risk";
   els.auditBadge.className = `audit-badge ${audit.level === "low" ? "" : audit.level}`;
-  els.inspectorToggleButton.className = `button ghost audit-toggle ${inspectorOpen ? "active" : ""} ${audit.level === "low" ? "" : audit.level}`;
-  els.inspectorToggleButton.innerHTML = `<span data-icon="shield"></span><span>Audit</span><strong>${audit.score}</strong>`;
+  els.auditTabScore.textContent = audit.score;
+  els.auditTabScore.className = audit.level === "low" ? "" : audit.level;
   els.auditFindings.innerHTML = audit.findings.length
     ? audit.findings.map((finding) => `<li class="${finding.level === "high" ? "high" : finding.level === "medium" ? "warn" : ""}">${escapeHtml(finding.message)}</li>`).join("")
     : "<li>No safety findings detected.</li>";
@@ -606,18 +614,6 @@ function deleteCategory(category) {
   render();
 }
 
-function toggleInspector() {
-  inspectorOpen = !inspectorOpen;
-  renderInspectorState();
-  renderIcons();
-}
-
-function closeInspector() {
-  inspectorOpen = false;
-  renderInspectorState();
-  renderIcons();
-}
-
 function exportJson() {
   if (!confirmRepositoryAction("Export includes saved prompts only. Unsaved changes will not be included. Continue?")) return;
   downloadFile(`prompt-vault-${dateStamp()}.json`, JSON.stringify(state, null, 2), "application/json");
@@ -811,8 +807,6 @@ els.newPromptButton.addEventListener("click", createPrompt);
 els.addCategoryButton.addEventListener("click", addCategory);
 els.categoryForm.addEventListener("submit", saveNewCategory);
 els.cancelCategoryButton.addEventListener("click", closeCategoryForm);
-els.inspectorToggleButton.addEventListener("click", toggleInspector);
-els.closeInspectorButton.addEventListener("click", closeInspector);
 els.form.addEventListener("submit", saveCurrentPrompt);
 els.duplicateButton.addEventListener("click", duplicatePrompt);
 els.deleteButton.addEventListener("click", deletePrompt);
@@ -826,6 +820,13 @@ els.insertGuideButton.addEventListener("click", insertGuideScaffold);
 els.confirmImportButton.addEventListener("click", confirmImportPreview);
 els.cancelImportButton.addEventListener("click", closeImportPreview);
 els.cancelImportTextButton.addEventListener("click", closeImportPreview);
+els.editorTabButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    activeEditorTab = button.dataset.editorTab;
+    renderEditorTabs();
+    renderIcons();
+  });
+});
 els.importButton.addEventListener("click", () => {
   if (!confirmRepositoryAction("Import adds prompts to saved data. Unsaved changes will not be included. Continue?")) return;
   els.importFile.click();
