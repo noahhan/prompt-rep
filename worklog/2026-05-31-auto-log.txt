@@ -91,3 +91,6 @@ Changed Save to an icon-only action, removed the refresh button border, and repl
 [2026-05-31T14:23:44.887Z] DONE - Remove All category
 Removed the duplicate All row from Categories and made Overview the only all-prompts view. Category selection now only uses real categories.
 
+[2026-05-31T14:43:08.561Z] DONE - Clarify empty category behavior
+Empty categories now show a dedicated empty state with New prompt and Remove empty category actions. Removed category row controls, separate expand buttons, and the redundant audit badge.
+

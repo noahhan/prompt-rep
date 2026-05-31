@@ -27,6 +27,7 @@ const els = {
   overviewList: document.querySelector("#overviewList"),
   searchInput: document.querySelector("#searchInput"),
   editorColumn: document.querySelector(".editor-column"),
+  editorEmptyState: document.querySelector("#editorEmptyState"),
   form: document.querySelector("#promptForm"),
   titleInput: document.querySelector("#titleInput"),
   editorStatus: document.querySelector("#editorStatus"),
@@ -40,7 +41,6 @@ const els = {
   bodyPreviewPanel: document.querySelector("#bodyPreviewPanel"),
   placeholderList: document.querySelector("#placeholderList"),
   auditScore: document.querySelector("#auditScore"),
-  auditBadge: document.querySelector("#auditBadge"),
   auditBreakdown: document.querySelector("#auditBreakdown"),
   auditDetails: document.querySelector("#auditDetails"),
   auditFindings: document.querySelector("#auditFindings"),
@@ -217,8 +217,6 @@ function renderEditorTabs() {
 
 function renderCategories() {
   const counts = new Map();
-  const totalCounts = new Map();
-  state.prompts.forEach((prompt) => totalCounts.set(prompt.category, (totalCounts.get(prompt.category) || 0) + 1));
   state.prompts.filter(matchesSearchAndTag).forEach((prompt) => counts.set(prompt.category, (counts.get(prompt.category) || 0) + 1));
   const categories = state.categories.filter(Boolean).sort();
   const editableCategories = state.categories.filter(Boolean).sort();
@@ -226,7 +224,6 @@ function renderCategories() {
   els.categoryList.innerHTML = categories
     .map((category) => {
       const count = counts.get(category) || 0;
-      const canDelete = (totalCounts.get(category) || 0) === 0;
       const isExpanded = expandedCategories.has(category);
       const categoryPrompts = getPromptsForCategory(category);
       const promptLinks = isExpanded && categoryPrompts.length
@@ -240,14 +237,10 @@ function renderCategories() {
         : "";
       return `<div class="category-node">
         <div class="nav-row">
-          <button class="category-expand ${isExpanded ? "expanded" : ""}" type="button" data-toggle-category="${escapeHtml(category)}" aria-label="${isExpanded ? "Collapse" : "Expand"} ${escapeHtml(category)}">
-            <span data-icon="chevron" aria-hidden="true"></span>
-          </button>
           <button class="nav-item ${category === selectedCategory ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
             <span>${escapeHtml(category)}</span>
             <span>${count}</span>
           </button>
-        ${canDelete ? `<button class="category-delete" type="button" data-delete-category="${escapeHtml(category)}" title="Delete empty category" aria-label="Delete ${escapeHtml(category)} category"><span data-icon="x"></span></button>` : ""}
         </div>
         ${promptLinks}
       </div>`;
@@ -341,11 +334,12 @@ function selectFirstVisiblePrompt() {
 function renderEditor() {
   const prompt = getSelectedPrompt();
   if (!prompt) {
-    els.form.querySelectorAll("input, textarea, select, button").forEach((node) => {
-      if (node.id !== "newPromptButton") node.disabled = true;
-    });
+    els.form.hidden = true;
+    renderEditorEmptyState();
     return;
   }
+  els.form.hidden = false;
+  els.editorEmptyState.hidden = true;
   els.form.querySelectorAll("input, textarea, select, button").forEach((node) => (node.disabled = false));
   const isDraft = selectedId === "__draft__";
   els.titleInput.value = prompt.title;
@@ -361,6 +355,21 @@ function renderEditor() {
   renderPlaceholders(prompt);
   renderAudit(prompt);
   renderHistory(prompt);
+}
+
+function renderEditorEmptyState() {
+  const category = selectedCategory || "this category";
+  const hasEmptyCategory = selectedCategory && !state.prompts.some((prompt) => prompt.category === selectedCategory);
+  els.editorEmptyState.hidden = false;
+  els.editorEmptyState.innerHTML = `
+    <span data-icon="file-text"></span>
+    <h3>No prompts in ${escapeHtml(category)}</h3>
+    <p>Create a prompt here, or remove this empty category.</p>
+    <div class="empty-actions">
+      <button class="text-action primary" type="button" data-empty-new-prompt>New prompt</button>
+      ${hasEmptyCategory ? `<button class="text-action danger" type="button" data-remove-empty-category="${escapeHtml(selectedCategory)}">Remove empty category</button>` : ""}
+    </div>
+  `;
 }
 
 function renderPlaceholders(prompt) {
@@ -521,8 +530,6 @@ function renderAudit(prompt) {
   const audit = auditPrompt(prompt);
   els.auditScore.textContent = audit.score;
   els.auditScore.parentElement.className = `score-ring ${audit.level}`;
-  els.auditBadge.textContent = audit.level === "low" ? "Clean" : audit.level === "medium" ? "Review" : "Risk";
-  els.auditBadge.className = `audit-badge ${audit.level === "low" ? "" : audit.level}`;
   renderAuditBreakdown(audit);
   renderAuditDetails(audit);
   els.auditFindings.innerHTML = audit.findings.length
@@ -843,15 +850,20 @@ function saveNewCategory(event) {
   render();
 }
 
-function deleteCategory(category) {
+function getDefaultCategory() {
+  return state.prompts[0]?.category || state.categories[0] || null;
+}
+
+function removeEmptyCategory(category) {
   if (!category) return;
-  const count = state.prompts.filter((prompt) => prompt.category === category).length;
-  if (count > 0) return;
+  if (state.prompts.some((prompt) => prompt.category === category)) return;
   state.categories = state.categories.filter((item) => item !== category);
-  if (selectedCategory === category) {
-    selectedCategory = state.categories[0] || null;
-    selectFirstVisiblePrompt();
-  }
+  expandedCategories.delete(category);
+  const fallbackPrompt = state.prompts[0] || null;
+  selectedId = fallbackPrompt?.id || null;
+  selectedCategory = fallbackPrompt?.category || getDefaultCategory();
+  selectedVersionIndex = null;
+  workspaceView = selectedId ? "editor" : "overview";
   saveState();
   render();
 }
@@ -1082,21 +1094,14 @@ els.categorySelect.addEventListener("change", () => {
 });
 
 document.addEventListener("click", (event) => {
-  const toggleCategoryButton = event.target.closest("[data-toggle-category]");
-  if (toggleCategoryButton) {
-    const category = toggleCategoryButton.dataset.toggleCategory;
-    if (expandedCategories.has(category)) {
-      expandedCategories.delete(category);
-    } else {
-      expandedCategories.add(category);
-    }
-    renderCategories();
-    renderIcons();
+  const emptyNewPromptButton = event.target.closest("[data-empty-new-prompt]");
+  if (emptyNewPromptButton) {
+    createPrompt();
     return;
   }
-  const deleteCategoryButton = event.target.closest("[data-delete-category]");
-  if (deleteCategoryButton) {
-    deleteCategory(deleteCategoryButton.dataset.deleteCategory);
+  const removeEmptyCategoryButton = event.target.closest("[data-remove-empty-category]");
+  if (removeEmptyCategoryButton) {
+    removeEmptyCategory(removeEmptyCategoryButton.dataset.removeEmptyCategory);
     return;
   }
   const categoryButton = event.target.closest("[data-category]");
@@ -1105,7 +1110,11 @@ document.addEventListener("click", (event) => {
     draftPrompt = null;
     hasUnsavedChanges = false;
     selectedCategory = categoryButton.dataset.category;
-    expandedCategories.add(selectedCategory);
+    if (expandedCategories.has(selectedCategory)) {
+      expandedCategories.delete(selectedCategory);
+    } else {
+      expandedCategories.add(selectedCategory);
+    }
     selectedTag = null;
     selectFirstVisiblePrompt();
     workspaceView = "editor";

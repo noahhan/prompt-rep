@@ -108,6 +108,7 @@
           </section>
 
           <section class="editor-column" aria-label="Prompt editor">
+            <section id="editorEmptyState" class="empty-state editor-empty-state" hidden></section>
             <form id="promptForm" class="editor">
               <div class="editor-toolbar">
                 <div class="editor-head">
@@ -189,7 +190,6 @@
                     <button id="refreshAuditButton" class="icon-button" type="button" title="Refresh audit" aria-label="Refresh audit">
                       <span data-icon="refresh"></span>
                     </button>
-                    <span id="auditBadge" class="audit-badge">Clean</span>
                   </div>
                 </div>
                 <div class="score-ring">
