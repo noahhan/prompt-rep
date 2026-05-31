@@ -1,0 +1,31 @@
+Date: 2026-05-31
+Project: Prompt Vault
+
+Task 1: Create offline prompt repository app
+Status: Done
+Summary: Built a local browser app for saving, editing, organizing, auditing, importing, exporting, and versioning prompts.
+
+Task 2: Improve category picker and prompt list design
+Status: Done
+Summary: Changed category input from datalist to a visible dropdown with a custom category option. Updated prompt list design.
+
+Task 3: Add prompt engineering research
+Status: Done
+Summary: Added local knowledge files about persona, few-shot, context block, output format, reasoning, and safety checks.
+
+Task 4: Create LLM Wiki knowledge base
+Status: Done
+Summary: Created a local LLM Wiki structure for managing prompt-engineering knowledge.
+
+Task 5: Add prompt guide panel
+Status: Done
+Summary: Added in-app task guide with prompt patterns and scaffold insertion.
+
+Verification:
+- node --check app.js passed.
+- Browser check was done earlier.
+- Need one more browser check after latest guide changes.
+
+User note:
+- Use simple and concise English.
+- Keep future task logs in worklog.

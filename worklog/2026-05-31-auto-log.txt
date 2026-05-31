@@ -1,0 +1,9 @@
+[2026-05-31T07:24:52.967Z] DONE - Add automatic worklog hook
+Created local logging script and Git post-commit hook template.
+
+[2026-05-31T07:35:45.572Z] DONE - Keep text worklog only
+Removed JSON auto log and updated logger to write only readable text logs.
+
+[2026-05-31T07:40:34.216Z] DONE - Finish prompt knowledge goal
+Added LLM Wiki index/log, online support plan, in-app prompt guide, and verified scaffold insertion in browser.
+

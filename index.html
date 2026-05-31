@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Vault</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d9488'/%3E%3Cpath d='M10 14h12v10H10zM12 14v-2a4 4 0 0 1 8 0v2' fill='none' stroke='white' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Prompt organization">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">PV</span>
+          <div>
+            <h1>Prompt Vault</h1>
+            <p>Local prompt repository</p>
+          </div>
+        </div>
+
+        <button id="newPromptButton" class="button primary full" type="button">
+          <span data-icon="plus"></span>
+          New prompt
+        </button>
+
+        <section class="nav-section">
+          <div class="section-head">
+            <h2>Categories</h2>
+            <button id="addCategoryButton" class="icon-button" type="button" title="Add category" aria-label="Add category">
+              <span data-icon="plus"></span>
+            </button>
+          </div>
+          <nav id="categoryList" class="nav-list"></nav>
+        </section>
+
+        <section class="nav-section">
+          <div class="section-head">
+            <h2>Tags</h2>
+          </div>
+          <div id="tagList" class="tag-cloud"></div>
+        </section>
+
+        <section class="nav-section storage">
+          <div class="section-head">
+            <h2>Storage</h2>
+          </div>
+          <div class="storage-row">
+            <span data-icon="database"></span>
+            <span id="storageStatus">Local only</span>
+          </div>
+          <div class="storage-row">
+            <span data-icon="wifi-off"></span>
+            <span>Offline ready</span>
+          </div>
+        </section>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="app-status">Saved in this browser</p>
+            <h2>Repository</h2>
+          </div>
+          <div class="topbar-actions">
+            <label class="search">
+              <span data-icon="search"></span>
+              <input id="searchInput" type="search" placeholder="Search prompts, tags, summaries..." />
+            </label>
+            <button id="importButton" class="button ghost" type="button">
+              <span data-icon="upload"></span>
+              Import
+            </button>
+            <button id="exportJsonButton" class="button ghost" type="button">
+              <span data-icon="download"></span>
+              JSON
+            </button>
+            <button id="exportMdButton" class="button ghost" type="button">
+              <span data-icon="file-text"></span>
+              MD
+            </button>
+            <input id="importFile" type="file" accept=".json,.md,.markdown,application/json,text/markdown,text/plain" hidden />
+          </div>
+        </header>
+
+        <section class="workspace">
+          <section class="prompt-column" aria-label="Saved prompts">
+            <div class="list-toolbar">
+              <div>
+                <h3>Prompts</h3>
+                <p id="promptCount">0 saved</p>
+              </div>
+              <select id="sortSelect" aria-label="Sort prompts">
+                <option value="updated">Recently updated</option>
+                <option value="title">Title</option>
+                <option value="risk">Audit risk</option>
+              </select>
+            </div>
+            <div id="promptList" class="prompt-list"></div>
+          </section>
+
+          <section class="editor-column" aria-label="Prompt editor">
+            <form id="promptForm" class="editor">
+              <div class="editor-head">
+                <div>
+                  <label for="titleInput">Prompt title</label>
+                  <input id="titleInput" class="title-input" type="text" autocomplete="off" required />
+                </div>
+                <div class="editor-actions">
+                  <button id="duplicateButton" class="icon-button" type="button" title="Duplicate prompt" aria-label="Duplicate prompt">
+                    <span data-icon="copy"></span>
+                  </button>
+                  <button id="deleteButton" class="icon-button danger" type="button" title="Delete prompt" aria-label="Delete prompt">
+                    <span data-icon="trash"></span>
+                  </button>
+                  <button class="button primary" type="submit">
+                    <span data-icon="save"></span>
+                    Save
+                  </button>
+                </div>
+              </div>
+
+              <div class="meta-grid">
+                <label>
+                  Category
+                  <select id="categorySelect"></select>
+                  <input id="categoryCustomInput" class="category-custom" type="text" placeholder="New category name" autocomplete="off" hidden />
+                </label>
+                <label>
+                  Tags
+                  <input id="tagsInput" type="text" placeholder="writing, research, coding" autocomplete="off" />
+                </label>
+              </div>
+
+              <label class="stacked">
+                Executive summary
+                <textarea id="summaryInput" rows="3" placeholder="One or two lines explaining when to use this prompt."></textarea>
+              </label>
+
+              <label class="stacked prompt-body-label">
+                Prompt body
+                <textarea id="bodyInput" rows="14" spellcheck="true"></textarea>
+              </label>
+
+              <div class="placeholder-panel">
+                <div>
+                  <h3>Reusable placeholders</h3>
+                  <p>Variables are detected from <code>{name}</code> expressions.</p>
+                </div>
+                <div id="placeholderList" class="placeholder-list"></div>
+              </div>
+
+              <section class="guide-panel" aria-label="Prompt engineering guide">
+                <div class="panel-head">
+                  <div>
+                    <h3>Prompt guide</h3>
+                    <p>Choose a task type to see useful prompt patterns.</p>
+                  </div>
+                  <select id="guideTaskSelect" aria-label="Prompt guide task type"></select>
+                </div>
+                <div id="guidePatternList" class="guide-pattern-list"></div>
+                <button id="insertGuideButton" class="button ghost" type="button">
+                  <span data-icon="plus"></span>
+                  Insert scaffold
+                </button>
+              </section>
+            </form>
+
+            <aside class="inspector" aria-label="Safety and history">
+              <section class="audit-panel">
+                <div class="panel-head">
+                  <h3>Safety audit</h3>
+                  <span id="auditBadge" class="audit-badge">Clean</span>
+                </div>
+                <div class="score-ring">
+                  <strong id="auditScore">100</strong>
+                  <span>score</span>
+                </div>
+                <ul id="auditFindings" class="audit-findings"></ul>
+              </section>
+
+              <section class="history-panel">
+                <div class="panel-head">
+                  <h3>Version history</h3>
+                  <button id="restoreButton" class="button compact" type="button" disabled>Restore</button>
+                </div>
+                <div id="historyList" class="history-list"></div>
+              </section>
+            </aside>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">
+        <span data-icon="file-text"></span>
+        <h3>No prompt selected</h3>
+        <p>Create a new prompt or choose one from the repository.</p>
+      </div>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

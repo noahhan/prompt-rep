@@ -1,0 +1,6 @@
+#!/bin/sh
+
+commit_subject="$(git log -1 --pretty=%s)"
+commit_hash="$(git rev-parse --short HEAD)"
+
+node scripts/log-task.mjs "Git commit: $commit_subject" "Commit hash: $commit_hash" "done"

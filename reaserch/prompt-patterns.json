@@ -1,0 +1,34 @@
+{
+  "patterns": [
+    {
+      "name": "Persona",
+      "whenToUse": "Use when the task needs expertise, review criteria, or a specific tone.",
+      "template": "You are a {role}. Your job is to {task_goal} for {audience}. Use these criteria: {criteria}."
+    },
+    {
+      "name": "Context Block",
+      "whenToUse": "Use when source material is long or should be separated from instructions.",
+      "template": "Task: {task}\\n\\nContext:\\n\\\"\\\"\\\"\\n{source_text}\\n\\\"\\\"\\\"\\n\\nUse only the context above unless you clearly label outside assumptions."
+    },
+    {
+      "name": "Few-Shot Examples",
+      "whenToUse": "Use for classification, extraction, tone matching, and custom formats.",
+      "template": "Follow these examples.\\n\\nExample 1\\nInput: {example_input_1}\\nOutput: {example_output_1}\\n\\nNow process:\\n{new_input}"
+    },
+    {
+      "name": "Output Format",
+      "whenToUse": "Use when output must be copied, compared, parsed, or reused.",
+      "template": "Return the answer in this format:\\n\\n## Summary\\n- {summary_rule}\\n\\n## Details\\n- {detail_rule}\\n\\n## Next actions\\n- {action_rule}"
+    },
+    {
+      "name": "Concise Reasoning",
+      "whenToUse": "Use for complex decisions without asking for hidden chain-of-thought.",
+      "template": "Think through the task privately. Return the final answer, key assumptions, concise rationale, and checks performed."
+    },
+    {
+      "name": "Rubric",
+      "whenToUse": "Use for review, audit, ranking, and quality control.",
+      "template": "Evaluate {item} using this rubric:\\n- Correctness: {correctness_definition}\\n- Completeness: {completeness_definition}\\n- Safety: {safety_definition}\\n- Clarity: {clarity_definition}\\n\\nReturn findings ordered by severity."
+    }
+  ]
+}

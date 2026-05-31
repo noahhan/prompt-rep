@@ -1,0 +1,10 @@
+.env
+.DS_Store
+.playwright-cli/
+node_modules/
+dist/
+coverage/
+*.log
+
+# Keep human worklogs, but do not publish temporary command logs.
+!worklog/*.txt
