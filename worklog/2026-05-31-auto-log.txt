@@ -102,3 +102,6 @@ Removed the icon from the Overview menu row and adjusted spacing so the left men
 
 [2026-05-31T14:55:52.360Z] DONE - Align Overview menu typography
 Matched the Overview menu font, size, count styling, and position with the Categories title for better left-menu consistency.
+[2026-05-31T15:01:55.911Z] DONE - Update project documents
+Updated README, blackboard docs, task lists, decision log, UI test note, technical review, and LLM Wiki meta files to match the current Prompt Vault app state.
+

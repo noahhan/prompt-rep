@@ -1,197 +1,86 @@
-# Prompt Vault — Critical Issues Blackboard
+# Prompt Vault Blackboard
 
 _Last updated: 2026-05-31_
 
-## Implementation Status
+This file is the root summary for important project status.
 
-2026-05-31 UI/UX pass:
+For detailed collaboration notes, use the `blackboard/` folder.
 
-- Fixed #1, #2, #3, #4, #5, #6, and #7.
-- Category cleanup now supports inline category creation and safe delete for empty categories.
-- Added detailed test note at `blackboard/notes/2026-05-31-ui-ux-test.md`.
+## Current Status
 
----
+Prompt Vault is now a usable local-first prompt repository.
 
-## #1 CRITICAL — `saveState()` fires on every render, including read-only operations
+Main user flow:
 
-**File:** `app.js:98–101`, `app.js:153–159`
+1. Open the app.
+2. Use Overview to see all prompts as cards.
+3. Use Categories to expand a category and select a prompt.
+4. Edit the prompt in Markdown mode.
+5. Check the rendered Preview.
+6. Use the Audit tab when safety or quality review is needed.
+7. Save, export, import, or restore history when needed.
 
-**Problem:**
-`render()` unconditionally calls `saveState()`. Every search keystroke, every category/tag filter click, every sort change — all trigger a full `JSON.stringify(state)` + `localStorage.setItem`. With a large prompt library this causes noticeable input lag and needlessly wears down localStorage write quotas.
+## Completed Critical Fixes
 
-**Root cause:**
-```js
-function render() {
-  saveState();          // ← always runs, even for read-only renders
-  renderCategories();
-  ...
-}
-```
+The earlier critical issues were fixed on 2026-05-31:
 
-**Fix:**
-Remove `saveState()` from `render()`. Call it explicitly only in mutating functions:
-- `saveCurrentPrompt` ✓
-- `createPrompt` ✓
-- `deletePrompt` ✓
-- `restoreVersion` ✓
-- `mergePrompts` (inside `importFile`) ✓
+- `render()` no longer writes to `localStorage` on normal read-only renders.
+- Search and sort no longer trigger unnecessary storage writes.
+- Import skips exact duplicate prompts.
+- Multi-prompt import selects the first imported prompt correctly.
+- Markdown import handles headings and code fences more safely.
+- Safety score ring changes by risk level.
+- New prompts stay as drafts until saved.
+- Unsaved edits are protected before switching prompts.
+- Category creation uses an inline form instead of browser `prompt()`.
+- Empty categories can be removed safely.
 
-```js
-function render() {
-  // NO saveState() here
-  renderCategories();
-  renderTags();
-  renderPromptList();
-  renderEditor();
-  renderIcons();
-}
-```
+## Current UI Decisions
 
----
+- The middle Prompts area was removed to give the editor more room.
+- Overview is a top-level left menu title, same level as Categories.
+- Categories expand by clicking the category row.
+- Separate expand arrows and category delete icons were removed.
+- Audit is an editor tab, not a permanent large side area.
+- Markdown and Preview use equal panel height.
+- The interface should stay clean: fewer icons, fewer boxes, less heavy rounding.
 
-## #2 CRITICAL — Import silently creates duplicates with no dedup check
+## Current Starter Library
 
-**File:** `app.js:454–472`
+The app now includes 17 starter prompts from the research knowledge base.
 
-**Problem:**
-`mergePrompts()` always generates a new `crypto.randomUUID()` for every imported item — even if the exact same file is imported twice. Users who re-import a backup or accidentally import the same export twice will end up with duplicated prompts and no warning.
+Categories:
 
-**Root cause:**
-```js
-function mergePrompts(prompts) {
-  prompts.forEach((item) => {
-    const prompt = {
-      id: crypto.randomUUID(),   // ← always new, never checks for existing
-      ...
-    };
-    state.prompts.unshift(prompt);
-    selectedId = prompt.id;      // ← also broken for multi-item imports (see #3)
-  });
-}
-```
+- Prompt Engineering
+- Business
+- Research
+- Coding
+- Writing
+- Data
+- Analysis
 
-**Fix — option A (simple):** Check for title+body collision before inserting:
-```js
-const isDuplicate = state.prompts.some(
-  (p) => p.title === prompt.title && p.body === prompt.body
-);
-if (!isDuplicate) {
-  state.prompts.unshift(prompt);
-}
-```
+Existing local users receive these starter prompts once. Saved local prompts are not overwritten.
 
-**Fix — option B (preserve original IDs from JSON export):**
-When importing JSON (not Markdown), reuse the original `item.id` if it doesn't already exist in state:
-```js
-const id = (file.name.endsWith('.json') && item.id && !state.prompts.find(p => p.id === item.id))
-  ? item.id
-  : crypto.randomUUID();
-```
+## Current Risks
 
----
+High priority:
 
-## #3 HIGH — `selectedId` ends up pointing to the last-processed import item, not the first
+- `app.js` is still large and should be split into modules.
+- State is still mostly global and mutable.
+- `localStorage` is fine for now, but IndexedDB is better for larger libraries.
+- Online sync is not built yet.
 
-**File:** `app.js:469`
+Medium priority:
 
-**Problem:**
-`mergePrompts` calls `state.prompts.unshift(prompt)` (adds to front) but also sets `selectedId = prompt.id` on every iteration. After the loop ends, `selectedId` is the *last* item processed — but because `unshift` was used, that item ends up at the *bottom* of the imported batch. The user sees the wrong prompt selected after a multi-item import.
+- Audit rules are useful but still hardcoded.
+- Mobile editing can be improved.
+- Some native alerts/confirms may still need custom UI.
+- Public repository safety must stay strict. Never commit `.env`, tokens, or secrets.
 
-**Fix:**
-Capture the first imported ID and set `selectedId` once after the loop:
-```js
-function mergePrompts(prompts) {
-  let firstId = null;
-  prompts.forEach((item) => {
-    const prompt = { ... };
-    ensureCategory(prompt.category);
-    state.prompts.unshift(prompt);
-    if (!firstId) firstId = prompt.id;
-  });
-  if (firstId) selectedId = firstId;
-}
-```
+## Next Good Steps
 
----
-
-## #4 HIGH — Score ring border is always teal regardless of risk level
-
-**File:** `styles.css:660–679`, `app.js:262–270`
-
-**Problem:**
-The circular score ring is the most visually prominent element in the Safety Audit panel. Its border is hardcoded to `var(--accent-soft)` (teal/green) even when the audit level is "medium" or "high". The badge and sidebar accent correctly turn amber/red, but the ring stays green — giving a false sense of safety.
-
-**Fix — CSS:** Add risk-level classes to the ring and style them:
-```css
-.score-ring.medium { border-color: var(--amber-soft); }
-.score-ring.high   { border-color: var(--red-soft); }
-```
-
-**Fix — JS in `renderAudit`:**
-```js
-els.auditScore.parentElement.className = `score-ring ${audit.level === 'low' ? '' : audit.level}`;
-```
-
----
-
-## #5 HIGH — Markdown import regex silently drops executive summary on mismatch
-
-**File:** `app.js:481`
-
-**Problem:**
-```js
-const summary = (block.match(/## Executive summary\s+([\s\S]*?)\s+## Prompt/) || [null, ""])[1]?.trim();
-```
-This regex requires both `## Executive summary` AND `## Prompt` sections to be present and in that exact order. If a Markdown block has extra whitespace, a typo in the heading, or no `## Prompt` section, the summary silently becomes `""`. The prompt body also relies on a similar fence:
-```js
-const body = (block.match(/```text\s+([\s\S]*?)```/) || [null, block])[1]?.trim();
-```
-If the code fence language tag is missing or wrong, the entire raw block becomes the body.
-
-**Fix:** Make headings case-insensitive and allow the `## Prompt` anchor to be optional:
-```js
-const summary = (block.match(/##\s+executive summary\s+([\s\S]*?)(?=\n##|$)/i) || [null, ""])[1]?.trim();
-const body = (block.match(/```(?:text)?\s+([\s\S]*?)```/i) || [null, block])[1]?.trim();
-```
-
----
-
-## #6 MEDIUM — No way to delete categories once created
-
-**File:** `app.js:384–390`, `app.js:162–177`
-
-**Problem:**
-Categories can be added via the sidebar "+" button or by typing a new name in the editor's category dropdown. But there is no delete path. Over time, misspelled or unused categories accumulate in the sidebar and the dropdown. The only way to clean up is to manually export JSON, edit the `categories` array, and re-import.
-
-**Fix:** Add a delete button next to each non-"All" category in the sidebar. Only show the button when no prompts use that category (or warn and offer to reassign).
-
----
-
-## #7 MEDIUM — `addCategory` uses browser's native `prompt()` dialog
-
-**File:** `app.js:384–390`
-
-**Problem:**
-```js
-function addCategory() {
-  const category = prompt("Category name");
-  ...
-}
-```
-The native `prompt()` dialog is visually jarring (OS-native modal, no styling), blocks the thread, and cannot be dismissed gracefully on mobile. It is inconsistent with the app's own UI patterns.
-
-**Fix:** Replace with an inline input that appears in the sidebar below the "+" button (toggle visibility), or reuse the existing `categoryCustomInput` pattern already present in the editor.
-
----
-
-## Summary Table
-
-| # | Severity | Problem | Effort to Fix |
-|---|----------|---------|---------------|
-| 1 | Critical | `saveState()` on every render (performance) | Low |
-| 2 | Critical | Import creates silent duplicates | Low–Medium |
-| 3 | High | Wrong prompt selected after multi-item import | Low |
-| 4 | High | Score ring color ignores risk level | Low |
-| 5 | High | Markdown import regex silently drops summary | Low |
-| 6 | Medium | No category deletion | Medium |
-| 7 | Medium | `addCategory` uses browser `prompt()` | Medium |
+1. Split `app.js` into storage, state, audit, import/export, and UI modules.
+2. Add a safer data layer plan: IndexedDB first, optional sync later.
+3. Add configurable audit rules.
+4. Improve mobile editor flow.
+5. Create a clear Git sync or online sync design before implementation.

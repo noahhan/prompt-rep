@@ -27,3 +27,13 @@ Useful ideas:
 - The LLM should maintain summaries, links, contradictions, and updates.
 - `index.md` helps navigation.
 - `log.md` gives a timeline.
+
+## [2026-05-31] app | Starter prompt library created
+
+Used the wiki concepts and playbooks to create the first app starter library.
+
+Result:
+
+- 17 starter prompts added to `data/prompts.json`.
+- Categories include prompt engineering, business, research, coding, writing, data, and analysis.
+- Existing local users receive starter prompts once through a merge step.

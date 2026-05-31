@@ -65,7 +65,9 @@ Cons:
 
 ## Recommendation
 
-Start with Git sync.
+Start with Git sync or file-based backup.
+
+Keep online support optional. The offline app should continue working without login or network.
 
 Next implementation:
 
@@ -74,3 +76,9 @@ Next implementation:
 3. Commit changes with Git.
 4. Use the worklog hook after commits.
 5. Later add real cloud sync if needed.
+
+Safety rule:
+
+- Never put GitHub tokens or API keys in frontend code.
+- Never commit `.env`.
+- For public repositories, assume all committed files are visible to everyone.

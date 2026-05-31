@@ -29,3 +29,9 @@ The wiki should help Prompt Vault answer:
 - What placeholders are useful?
 - What output format is best?
 - What safety check is needed?
+
+## App Use
+
+The current app uses this wiki as source material for the starter prompt library in `data/prompts.json`.
+
+The first starter library includes 17 prompts for prompt engineering, business, research, coding, writing, data, and analysis.
