@@ -23,6 +23,7 @@ const els = {
   sortSelect: document.querySelector("#sortSelect"),
   form: document.querySelector("#promptForm"),
   titleInput: document.querySelector("#titleInput"),
+  editorStatus: document.querySelector("#editorStatus"),
   categorySelect: document.querySelector("#categorySelect"),
   categoryCustomInput: document.querySelector("#categoryCustomInput"),
   tagsInput: document.querySelector("#tagsInput"),
@@ -103,6 +104,8 @@ let selectedCategory = "All";
 let selectedTag = null;
 let selectedVersionIndex = null;
 let pendingImportPrompts = [];
+let draftPrompt = null;
+let hasUnsavedChanges = false;
 
 function makeSeedState() {
   const now = new Date().toISOString();
@@ -169,7 +172,11 @@ async function loadDataFileIfEmpty() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  els.storageStatus.textContent = `${state.prompts.length} prompts`;
+  updateStorageStatus();
+}
+
+function updateStorageStatus() {
+  els.storageStatus.textContent = `${state.prompts.length} saved prompts`;
 }
 
 function normalizeTags(value) {
@@ -181,6 +188,7 @@ function normalizeTags(value) {
 }
 
 function getSelectedPrompt() {
+  if (selectedId === "__draft__") return draftPrompt;
   return state.prompts.find((prompt) => prompt.id === selectedId) || null;
 }
 
@@ -223,7 +231,7 @@ function renderIcons(root = document) {
 }
 
 function render() {
-  saveState();
+  updateStorageStatus();
   renderCategories();
   renderTags();
   renderPromptList();
@@ -318,6 +326,12 @@ function renderListStats(prompts) {
   `;
 }
 
+function selectFirstVisiblePrompt() {
+  const [firstPrompt] = getFilteredPrompts();
+  selectedId = firstPrompt?.id || null;
+  selectedVersionIndex = null;
+}
+
 function renderEditor() {
   const prompt = getSelectedPrompt();
   if (!prompt) {
@@ -327,7 +341,12 @@ function renderEditor() {
     return;
   }
   els.form.querySelectorAll("input, textarea, select, button").forEach((node) => (node.disabled = false));
+  const isDraft = selectedId === "__draft__";
   els.titleInput.value = prompt.title;
+  els.editorStatus.textContent = isDraft ? "Draft - not saved yet" : "Saved prompt";
+  els.duplicateButton.disabled = isDraft;
+  els.deleteButton.title = isDraft ? "Discard draft" : "Delete prompt";
+  els.deleteButton.setAttribute("aria-label", isDraft ? "Discard draft" : "Delete prompt");
   const hasCategory = state.categories.includes(prompt.category);
   els.categorySelect.value = hasCategory ? prompt.category : "__new__";
   els.categoryCustomInput.hidden = hasCategory;
@@ -335,9 +354,21 @@ function renderEditor() {
   els.tagsInput.value = prompt.tags.join(", ");
   els.summaryInput.value = prompt.summary;
   els.bodyInput.value = prompt.body;
+  if (els.guideTaskSelect.options.length) {
+    els.guideTaskSelect.value = String(guessGuideIndex(prompt));
+  }
   renderPlaceholders(prompt);
   renderAudit(prompt);
   renderHistory(prompt);
+}
+
+function guessGuideIndex(prompt) {
+  const text = `${prompt.title} ${prompt.category} ${prompt.tags.join(" ")} ${prompt.summary} ${prompt.body}`.toLowerCase();
+  if (/(code|review|diff|bug|security|test|language)/.test(text)) return 1;
+  if (/(research|source|evidence|confidence|synthesis)/.test(text)) return 2;
+  if (/(extract|json|schema|field|table)/.test(text)) return 3;
+  if (/(write|edit|draft|tone|audience|style)/.test(text)) return 4;
+  return 0;
 }
 
 function renderPlaceholders(prompt) {
@@ -350,6 +381,7 @@ function renderPlaceholders(prompt) {
 function renderAudit(prompt) {
   const audit = auditPrompt(prompt);
   els.auditScore.textContent = audit.score;
+  els.auditScore.parentElement.className = `score-ring ${audit.level}`;
   els.auditBadge.textContent = audit.level === "low" ? "Clean" : audit.level === "medium" ? "Review" : "Risk";
   els.auditBadge.className = `audit-badge ${audit.level === "low" ? "" : audit.level}`;
   els.auditFindings.innerHTML = audit.findings.length
@@ -370,9 +402,10 @@ function renderHistory(prompt) {
 }
 
 function createPrompt() {
+  if (!confirmPendingEditorChanges()) return;
   const now = new Date().toISOString();
-  const prompt = {
-    id: crypto.randomUUID(),
+  draftPrompt = {
+    id: "__draft__",
     title: "Untitled prompt",
     category: selectedCategory === "All" ? "Writing" : selectedCategory,
     tags: [],
@@ -382,10 +415,10 @@ function createPrompt() {
     updatedAt: now,
     history: []
   };
-  state.prompts.unshift(prompt);
-  ensureCategory(prompt.category);
-  selectedId = prompt.id;
+  selectedId = "__draft__";
   selectedVersionIndex = null;
+  selectedTag = null;
+  hasUnsavedChanges = false;
   render();
   els.titleInput.focus();
   els.titleInput.select();
@@ -395,23 +428,38 @@ function saveCurrentPrompt(event) {
   event.preventDefault();
   const prompt = getSelectedPrompt();
   if (!prompt) return;
-  const snapshot = { ...prompt, history: undefined };
-  prompt.history = [snapshot, ...prompt.history].slice(0, 30);
+  const isDraft = selectedId === "__draft__";
+  if (!isDraft) {
+    const snapshot = { ...prompt, history: undefined };
+    prompt.history = [snapshot, ...prompt.history].slice(0, 30);
+  }
   prompt.title = els.titleInput.value.trim() || "Untitled prompt";
   prompt.category = getEditorCategory();
   prompt.tags = normalizeTags(els.tagsInput.value);
   prompt.summary = els.summaryInput.value.trim();
   prompt.body = els.bodyInput.value;
   prompt.updatedAt = new Date().toISOString();
+  if (isDraft) {
+    prompt.id = crypto.randomUUID();
+    prompt.createdAt = prompt.updatedAt;
+    prompt.history = [];
+    state.prompts.unshift(prompt);
+    selectedId = prompt.id;
+    draftPrompt = null;
+  }
+  hasUnsavedChanges = false;
   ensureCategory(prompt.category);
   selectedCategory = selectedCategory === "All" ? "All" : prompt.category;
+  if (selectedTag && !prompt.tags.includes(selectedTag)) selectedTag = null;
   selectedVersionIndex = null;
+  saveState();
   render();
 }
 
 function duplicatePrompt() {
+  if (!confirmPendingEditorChanges()) return;
   const prompt = getSelectedPrompt();
-  if (!prompt) return;
+  if (!prompt || selectedId === "__draft__") return;
   const now = new Date().toISOString();
   const copy = {
     ...structuredClone(prompt),
@@ -424,21 +472,32 @@ function duplicatePrompt() {
   state.prompts.unshift(copy);
   selectedId = copy.id;
   selectedVersionIndex = null;
+  saveState();
   render();
 }
 
 function deletePrompt() {
   const prompt = getSelectedPrompt();
   if (!prompt) return;
+  if (selectedId === "__draft__") {
+    draftPrompt = null;
+    selectedId = state.prompts[0]?.id || null;
+    selectedVersionIndex = null;
+    hasUnsavedChanges = false;
+    render();
+    return;
+  }
   const confirmed = confirm(`Delete "${prompt.title}"? This only removes it from local storage.`);
   if (!confirmed) return;
   state.prompts = state.prompts.filter((item) => item.id !== prompt.id);
   selectedId = state.prompts[0]?.id || null;
   selectedVersionIndex = null;
+  saveState();
   render();
 }
 
 function restoreVersion() {
+  if (!confirmPendingEditorChanges()) return;
   const prompt = getSelectedPrompt();
   if (!prompt || selectedVersionIndex === null) return;
   const version = prompt.history[selectedVersionIndex];
@@ -455,7 +514,32 @@ function restoreVersion() {
   });
   ensureCategory(prompt.category);
   selectedVersionIndex = null;
+  hasUnsavedChanges = false;
+  saveState();
   render();
+}
+
+function markEditorDirty() {
+  if (selectedId === "__draft__") {
+    els.editorStatus.textContent = "Draft - not saved yet";
+    return;
+  }
+  hasUnsavedChanges = true;
+  els.editorStatus.textContent = "Unsaved changes";
+}
+
+function hasPendingEditorChanges() {
+  return selectedId === "__draft__" || hasUnsavedChanges;
+}
+
+function confirmPendingEditorChanges() {
+  if (!hasPendingEditorChanges()) return true;
+  return confirm("You have unsaved changes. Continue and discard them?");
+}
+
+function confirmRepositoryAction(message) {
+  if (!hasPendingEditorChanges()) return true;
+  return confirm(message);
 }
 
 function ensureCategory(category) {
@@ -470,18 +554,24 @@ function getEditorCategory() {
 }
 
 function addCategory() {
+  if (!confirmPendingEditorChanges()) return;
   const category = prompt("Category name");
   if (!category) return;
+  draftPrompt = null;
+  hasUnsavedChanges = false;
   ensureCategory(category.trim());
   selectedCategory = category.trim();
+  saveState();
   render();
 }
 
 function exportJson() {
+  if (!confirmRepositoryAction("Export includes saved prompts only. Unsaved changes will not be included. Continue?")) return;
   downloadFile(`prompt-vault-${dateStamp()}.json`, JSON.stringify(state, null, 2), "application/json");
 }
 
 function exportMarkdown() {
+  if (!confirmRepositoryAction("Export includes saved prompts only. Unsaved changes will not be included. Continue?")) return;
   const md = state.prompts
     .map((prompt) => {
       const audit = auditPrompt(prompt);
@@ -537,6 +627,7 @@ function insertGuideScaffold() {
   };
   renderPlaceholders(draft);
   renderAudit(draft);
+  markEditorDirty();
   els.bodyInput.focus();
 }
 
@@ -615,17 +706,31 @@ function confirmImportPreview() {
   selectedCategory = "All";
   selectedTag = null;
   els.importPreviewModal.hidden = true;
+  saveState();
   render();
 }
 
 function mergePrompts(prompts) {
   const now = new Date().toISOString();
+  const existingKeys = new Set(state.prompts.map((prompt) => promptKey(prompt)));
+  const existingIds = new Set(state.prompts.map((prompt) => prompt.id));
+  let firstImportedId = null;
   prompts.forEach((item) => {
     const prompt = normalizePrompt(item, now);
+    if (existingIds.has(prompt.id)) prompt.id = crypto.randomUUID();
+    const key = promptKey(prompt);
+    if (existingKeys.has(key)) return;
     ensureCategory(prompt.category);
     state.prompts.unshift(prompt);
-    selectedId = prompt.id;
+    existingKeys.add(key);
+    existingIds.add(prompt.id);
+    if (!firstImportedId) firstImportedId = prompt.id;
   });
+  if (firstImportedId) selectedId = firstImportedId;
+}
+
+function promptKey(prompt) {
+  return `${String(prompt.title || "").trim().toLowerCase()}::${String(prompt.body || "").trim()}`;
 }
 
 function normalizePrompt(item, now = new Date().toISOString()) {
@@ -647,10 +752,10 @@ function parseMarkdownPrompts(text) {
     .split(/\n---\n/g)
     .map((block) => {
       const title = (block.match(/^#\s+(.+)$/m) || [null, "Imported prompt"])[1];
-      const category = (block.match(/^- Category:\s*(.+)$/m) || [null, "Imported"])[1];
-      const tags = (block.match(/^- Tags:\s*(.+)$/m) || [null, ""])[1];
-      const summary = (block.match(/## Executive summary\s+([\s\S]*?)\s+## Prompt/) || [null, ""])[1]?.trim();
-      const body = (block.match(/```text\s+([\s\S]*?)```/) || [null, block])[1]?.trim();
+      const category = (block.match(/^- Category:\s*(.+)$/im) || [null, "Imported"])[1];
+      const tags = (block.match(/^- Tags:\s*(.+)$/im) || [null, ""])[1];
+      const summary = (block.match(/##\s+executive summary\s+([\s\S]*?)(?=\n##|$)/i) || [null, ""])[1]?.trim();
+      const body = (block.match(/```(?:text)?\s+([\s\S]*?)```/i) || [null, block])[1]?.trim();
       return { title, category, tags, summary, body };
     })
     .filter((prompt) => prompt.body);
@@ -688,7 +793,10 @@ els.insertGuideButton.addEventListener("click", insertGuideScaffold);
 els.confirmImportButton.addEventListener("click", confirmImportPreview);
 els.cancelImportButton.addEventListener("click", closeImportPreview);
 els.cancelImportTextButton.addEventListener("click", closeImportPreview);
-els.importButton.addEventListener("click", () => els.importFile.click());
+els.importButton.addEventListener("click", () => {
+  if (!confirmRepositoryAction("Import adds prompts to saved data. Unsaved changes will not be included. Continue?")) return;
+  els.importFile.click();
+});
 els.importFile.addEventListener("change", (event) => {
   const [file] = event.target.files;
   if (file) importFile(file);
@@ -706,6 +814,7 @@ els.importFile.addEventListener("change", (event) => {
     };
     renderPlaceholders(prompt);
     renderAudit(prompt);
+    markEditorDirty();
     renderIcons();
   });
 });
@@ -714,23 +823,35 @@ els.categorySelect.addEventListener("change", () => {
   const isCustom = els.categorySelect.value === "__new__";
   els.categoryCustomInput.hidden = !isCustom;
   if (isCustom) els.categoryCustomInput.focus();
+  markEditorDirty();
 });
 
 document.addEventListener("click", (event) => {
   const categoryButton = event.target.closest("[data-category]");
   if (categoryButton) {
+    if (!confirmPendingEditorChanges()) return;
+    draftPrompt = null;
+    hasUnsavedChanges = false;
     selectedCategory = categoryButton.dataset.category;
     selectedTag = null;
+    selectFirstVisiblePrompt();
     render();
   }
   const tagButton = event.target.closest("[data-tag]");
   if (tagButton) {
+    if (!confirmPendingEditorChanges()) return;
+    draftPrompt = null;
+    hasUnsavedChanges = false;
     selectedTag = selectedTag === tagButton.dataset.tag ? null : tagButton.dataset.tag;
     selectedCategory = "All";
+    selectFirstVisiblePrompt();
     render();
   }
   const promptButton = event.target.closest("[data-prompt-id]");
   if (promptButton) {
+    if (promptButton.dataset.promptId !== selectedId && !confirmPendingEditorChanges()) return;
+    draftPrompt = null;
+    hasUnsavedChanges = false;
     selectedId = promptButton.dataset.promptId;
     selectedVersionIndex = null;
     render();
@@ -744,6 +865,7 @@ document.addEventListener("click", (event) => {
 
 async function initApp() {
   await loadDataFileIfEmpty();
+  saveState();
   render();
 }
 

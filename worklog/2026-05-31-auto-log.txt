@@ -16,3 +16,6 @@ Created shared blackboard folder for agent context, perspectives, decisions, not
 [2026-05-31T09:20:16.084Z] DONE - Add data files and import preview
 Added data/prompts.json, data/templates.json, import preview modal, stronger guide UI, and template insertion support.
 
+[2026-05-31T09:45:22.392Z] DONE - Run UI UX user test
+Tested buttons, filters, draft flow, import/export logic, guide behavior, desktop/mobile layouts, and fixed critical blackboard issues.
+

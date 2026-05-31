@@ -17,3 +17,4 @@
 - Added prompt template library metadata.
 - Added import preview.
 - Improved prompt guide UI.
+- Ran UI/UX browser test and fixed critical editor/import/audit issues.
