@@ -109,34 +109,36 @@
 
           <section class="editor-column" aria-label="Prompt editor">
             <form id="promptForm" class="editor">
-              <div class="editor-head">
-                <div>
-                  <label for="titleInput">Prompt title</label>
-                  <input id="titleInput" class="title-input" type="text" autocomplete="off" required />
-                  <p id="editorStatus" class="editor-status"></p>
+              <div class="editor-toolbar">
+                <div class="editor-head">
+                  <div>
+                    <label for="titleInput">Prompt title</label>
+                    <input id="titleInput" class="title-input" type="text" autocomplete="off" required />
+                    <p id="editorStatus" class="editor-status"></p>
+                  </div>
+                  <div class="editor-actions">
+                    <button id="duplicateButton" class="icon-button" type="button" title="Duplicate prompt" aria-label="Duplicate prompt">
+                      <span data-icon="copy"></span>
+                    </button>
+                    <button id="deleteButton" class="icon-button danger" type="button" title="Delete prompt" aria-label="Delete prompt">
+                      <span data-icon="trash"></span>
+                    </button>
+                    <button class="button primary" type="submit">
+                      <span data-icon="save"></span>
+                      Save
+                    </button>
+                  </div>
                 </div>
-                <div class="editor-actions">
-                  <button id="duplicateButton" class="icon-button" type="button" title="Duplicate prompt" aria-label="Duplicate prompt">
-                    <span data-icon="copy"></span>
-                  </button>
-                  <button id="deleteButton" class="icon-button danger" type="button" title="Delete prompt" aria-label="Delete prompt">
-                    <span data-icon="trash"></span>
-                  </button>
-                  <button class="button primary" type="submit">
-                    <span data-icon="save"></span>
-                    Save
-                  </button>
-                </div>
-              </div>
 
-              <div class="editor-tabs" role="tablist" aria-label="Prompt details">
-                <button id="promptTabButton" class="active" type="button" role="tab" aria-selected="true" aria-controls="promptTabPanel" data-editor-tab="prompt">Prompt</button>
-                <button id="auditTabButton" type="button" role="tab" aria-selected="false" aria-controls="auditTabPanel" data-editor-tab="audit">
-                  <span data-icon="shield"></span>
-                  Audit
-                  <strong id="auditTabScore">100</strong>
-                </button>
-                <button id="historyTabButton" type="button" role="tab" aria-selected="false" aria-controls="historyTabPanel" data-editor-tab="history">History</button>
+                <div class="editor-tabs" role="tablist" aria-label="Prompt details">
+                  <button id="promptTabButton" class="active" type="button" role="tab" aria-selected="true" aria-controls="promptTabPanel" data-editor-tab="prompt">Prompt</button>
+                  <button id="auditTabButton" type="button" role="tab" aria-selected="false" aria-controls="auditTabPanel" data-editor-tab="audit">
+                    <span data-icon="shield"></span>
+                    Audit
+                    <strong id="auditTabScore">100</strong>
+                  </button>
+                  <button id="historyTabButton" type="button" role="tab" aria-selected="false" aria-controls="historyTabPanel" data-editor-tab="history">History</button>
+                </div>
               </div>
 
               <section id="promptTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="promptTabButton">

@@ -828,8 +828,15 @@ select:focus {
   padding: 24px;
 }
 
+.editor-toolbar {
+  display: grid;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+}
+
 .editor-head {
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .editor-head > div:first-child {
@@ -847,9 +854,8 @@ label {
 
 .title-input {
   width: 100%;
-  padding: 7px 0;
+  padding: 2px 0 0;
   border: 0;
-  border-bottom: 1px solid var(--line-strong);
   border-radius: 0;
   font-size: 24px;
   font-weight: 800;
@@ -861,7 +867,7 @@ label {
 }
 
 .editor-status {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
@@ -870,14 +876,24 @@ label {
 .editor-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  padding: 5px;
+}
+
+.editor-actions .button.primary {
+  min-width: 82px;
 }
 
 .editor-tabs {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   align-self: flex-start;
   gap: 4px;
+  width: min(100%, 430px);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   background: var(--panel-strong);
@@ -887,7 +903,9 @@ label {
 .editor-tabs button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
+  flex: 1;
   min-height: 34px;
   border: 0;
   border-radius: 7px;
@@ -932,10 +950,6 @@ label {
 
 .tab-panel[hidden] {
   display: none;
-}
-
-.audit-tab-panel {
-  max-width: 720px;
 }
 
 .meta-grid {
@@ -1256,10 +1270,22 @@ code {
 .history-panel {
   display: grid;
   gap: 14px;
+  width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: #fff;
   padding: 15px;
+}
+
+.audit-panel {
+  grid-template-columns: 148px minmax(0, 1fr);
+  align-items: start;
+}
+
+.audit-panel .panel-head,
+.audit-panel .audit-details,
+.audit-panel .audit-findings {
+  grid-column: 1 / -1;
 }
 
 .panel-head h3 {
@@ -1296,7 +1322,7 @@ code {
   place-items: center;
   width: 112px;
   height: 112px;
-  margin: 0 auto;
+  margin: 0;
   border: 10px solid var(--accent-soft);
   border-radius: 50%;
 }
@@ -1324,6 +1350,7 @@ code {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
+  align-self: center;
 }
 
 .score-card {
@@ -1593,6 +1620,16 @@ code {
 
   .audit-breakdown {
     grid-template-columns: 1fr;
+  }
+
+  .audit-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .audit-panel .panel-head,
+  .audit-panel .audit-details,
+  .audit-panel .audit-findings {
+    grid-column: auto;
   }
 
   .audit-details {
