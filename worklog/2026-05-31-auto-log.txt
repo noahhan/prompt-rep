@@ -7,3 +7,6 @@ Removed JSON auto log and updated logger to write only readable text logs.
 [2026-05-31T07:40:34.216Z] DONE - Finish prompt knowledge goal
 Added LLM Wiki index/log, online support plan, in-app prompt guide, and verified scaffold insertion in browser.
 
+[2026-05-31T07:52:41.238Z] DONE - Publish project to GitHub
+Checked ignored files and secret patterns, improved list UI, merged remote README, pushed main to public repository, and reset remote URL to the clean GitHub URL.
+
