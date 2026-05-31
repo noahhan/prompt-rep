@@ -213,6 +213,12 @@ button {
   gap: 12px;
 }
 
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -225,6 +231,49 @@ button {
   padding: 9px 10px;
   color: var(--text);
   text-align: left;
+}
+
+.category-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+}
+
+.category-delete:hover {
+  border-color: var(--red-soft);
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.category-form {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+.category-form[hidden] {
+  display: none;
+}
+
+.category-form input {
+  min-height: 36px;
+}
+
+.category-form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .nav-item:hover,

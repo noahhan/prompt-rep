@@ -28,3 +28,6 @@ Changed the prompt list sort control from a native dropdown to custom segmented 
 [2026-05-31T10:14:55.305Z] DONE - Restore and style sort dropdown
 Restored the sort dropdown per user feedback and improved its visible design with label, custom arrow, spacing, border, and shadow.
 
+[2026-05-31T10:22:09.371Z] DONE - Improve category UX
+Replaced browser prompt with inline category form, added cancel behavior, and added safe delete buttons only for empty categories.
+

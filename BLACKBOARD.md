@@ -6,8 +6,8 @@ _Last updated: 2026-05-31_
 
 2026-05-31 UI/UX pass:
 
-- Fixed #1, #2, #3, #4, and #5.
-- Kept #6 and #7 open because category cleanup needs a small UI design decision.
+- Fixed #1, #2, #3, #4, #5, #6, and #7.
+- Category cleanup now supports inline category creation and safe delete for empty categories.
 - Added detailed test note at `blackboard/notes/2026-05-31-ui-ux-test.md`.
 
 ---

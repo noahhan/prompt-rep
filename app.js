@@ -38,6 +38,9 @@ const els = {
   storageStatus: document.querySelector("#storageStatus"),
   newPromptButton: document.querySelector("#newPromptButton"),
   addCategoryButton: document.querySelector("#addCategoryButton"),
+  categoryForm: document.querySelector("#categoryForm"),
+  categoryNameInput: document.querySelector("#categoryNameInput"),
+  cancelCategoryButton: document.querySelector("#cancelCategoryButton"),
   duplicateButton: document.querySelector("#duplicateButton"),
   deleteButton: document.querySelector("#deleteButton"),
   importButton: document.querySelector("#importButton"),
@@ -106,6 +109,7 @@ let selectedVersionIndex = null;
 let pendingImportPrompts = [];
 let draftPrompt = null;
 let hasUnsavedChanges = false;
+let categoryFormOpen = false;
 
 function makeSeedState() {
   const now = new Date().toISOString();
@@ -245,10 +249,18 @@ function renderCategories() {
   state.prompts.forEach((prompt) => counts.set(prompt.category, (counts.get(prompt.category) || 0) + 1));
   const categories = ["All", ...state.categories.filter(Boolean).sort()];
   const editableCategories = state.categories.filter(Boolean).sort();
+  els.categoryForm.hidden = !categoryFormOpen;
   els.categoryList.innerHTML = categories
     .map((category) => {
       const count = category === "All" ? state.prompts.length : counts.get(category) || 0;
-      return `<button class="nav-item ${category === selectedCategory ? "active" : ""}" type="button" data-category="${escapeHtml(category)}"><span>${escapeHtml(category)}</span><span>${count}</span></button>`;
+      const canDelete = category !== "All" && count === 0;
+      return `<div class="nav-row">
+        <button class="nav-item ${category === selectedCategory ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
+          <span>${escapeHtml(category)}</span>
+          <span>${count}</span>
+        </button>
+        ${canDelete ? `<button class="category-delete" type="button" data-delete-category="${escapeHtml(category)}" title="Delete empty category" aria-label="Delete ${escapeHtml(category)} category"><span data-icon="trash"></span></button>` : ""}
+      </div>`;
     })
     .join("");
   els.categorySelect.innerHTML = [
@@ -563,12 +575,46 @@ function getEditorCategory() {
 
 function addCategory() {
   if (!confirmPendingEditorChanges()) return;
-  const category = prompt("Category name");
-  if (!category) return;
   draftPrompt = null;
   hasUnsavedChanges = false;
-  ensureCategory(category.trim());
-  selectedCategory = category.trim();
+  categoryFormOpen = true;
+  render();
+  els.categoryNameInput.focus();
+}
+
+function closeCategoryForm() {
+  categoryFormOpen = false;
+  els.categoryNameInput.value = "";
+  renderCategories();
+  renderIcons();
+}
+
+function saveNewCategory(event) {
+  event.preventDefault();
+  const category = els.categoryNameInput.value.trim();
+  if (!category) {
+    els.categoryNameInput.focus();
+    return;
+  }
+  ensureCategory(category);
+  selectedCategory = category;
+  selectedTag = null;
+  selectFirstVisiblePrompt();
+  categoryFormOpen = false;
+  els.categoryNameInput.value = "";
+  saveState();
+  render();
+}
+
+function deleteCategory(category) {
+  if (!category || category === "All") return;
+  const count = state.prompts.filter((prompt) => prompt.category === category).length;
+  if (count > 0) return;
+  state.categories = state.categories.filter((item) => item !== category);
+  if (selectedCategory === category) {
+    selectedCategory = "All";
+    selectFirstVisiblePrompt();
+  }
   saveState();
   render();
 }
@@ -788,6 +834,8 @@ function escapeHtml(value) {
 
 els.newPromptButton.addEventListener("click", createPrompt);
 els.addCategoryButton.addEventListener("click", addCategory);
+els.categoryForm.addEventListener("submit", saveNewCategory);
+els.cancelCategoryButton.addEventListener("click", closeCategoryForm);
 els.form.addEventListener("submit", saveCurrentPrompt);
 els.duplicateButton.addEventListener("click", duplicatePrompt);
 els.deleteButton.addEventListener("click", deletePrompt);
@@ -835,6 +883,11 @@ els.categorySelect.addEventListener("change", () => {
 });
 
 document.addEventListener("click", (event) => {
+  const deleteCategoryButton = event.target.closest("[data-delete-category]");
+  if (deleteCategoryButton) {
+    deleteCategory(deleteCategoryButton.dataset.deleteCategory);
+    return;
+  }
   const categoryButton = event.target.closest("[data-category]");
   if (categoryButton) {
     if (!confirmPendingEditorChanges()) return;

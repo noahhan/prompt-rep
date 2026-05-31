@@ -18,3 +18,5 @@
 - Added import preview.
 - Improved prompt guide UI.
 - Ran UI/UX browser test and fixed critical editor/import/audit issues.
+- Replaced category popup with inline add form.
+- Added safe delete for empty categories.
