@@ -63,6 +63,9 @@ const els = {
   cancelImportTextButton: document.querySelector("#cancelImportTextButton")
 };
 
+const { auditPrompt, getPlaceholders } = window.PromptVaultAudit;
+const importCore = window.PromptVaultImport;
+
 const promptGuide = [
   {
     task: "Executive summary",
@@ -190,47 +193,12 @@ function updateStorageStatus() {
 }
 
 function normalizeTags(value) {
-  return value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-    .filter((tag, index, list) => list.indexOf(tag) === index);
+  return importCore.normalizeTags(value);
 }
 
 function getSelectedPrompt() {
   if (selectedId === "__draft__") return draftPrompt;
   return state.prompts.find((prompt) => prompt.id === selectedId) || null;
-}
-
-function auditPrompt(prompt) {
-  const text = `${prompt.title}\n${prompt.summary}\n${prompt.body}`.toLowerCase();
-  const rules = [
-    { level: "high", weight: 35, pattern: /(ignore|bypass|override).{0,30}(system|instruction|policy|guardrail)/, message: "Possible instruction-bypass wording." },
-    { level: "high", weight: 30, pattern: /(password|api key|secret|token|credential).{0,30}(print|show|extract|reveal|return)/, message: "May request sensitive credential disclosure." },
-    { level: "medium", weight: 18, pattern: /(personal data|ssn|passport|credit card|medical record|private)/, message: "Mentions sensitive personal data; verify minimization." },
-    { level: "medium", weight: 15, pattern: /(delete|drop|wipe|destroy|reset).{0,30}(database|file|record|table)/, message: "Contains destructive operation language." },
-    { level: "medium", weight: 12, pattern: /(malware|phishing|exploit|keylogger|ransomware)/, message: "Security-sensitive topic detected." }
-  ];
-  const findings = rules.filter((rule) => rule.pattern.test(text));
-  const missingSummary = prompt.summary.trim().length < 20;
-  const missingVariables = getPlaceholders(prompt.body).length === 0;
-  let score = 100 - findings.reduce((sum, finding) => sum + finding.weight, 0);
-  if (missingSummary) score -= 8;
-  if (missingVariables) score -= 4;
-  score = Math.max(0, score);
-  return {
-    score,
-    level: score < 70 ? "high" : score < 88 ? "medium" : "low",
-    findings: [
-      ...findings,
-      ...(missingSummary ? [{ level: "medium", message: "Executive summary is short or missing." }] : []),
-      ...(missingVariables ? [{ level: "low", message: "No reusable {placeholder} variables detected." }] : [])
-    ]
-  };
-}
-
-function getPlaceholders(body) {
-  return [...new Set((body.match(/\{[a-zA-Z0-9_.-]+\}/g) || []).map((item) => item.slice(1, -1)))];
 }
 
 function renderIcons(root = document) {
@@ -740,11 +708,7 @@ function importFile(file) {
 }
 
 function parseImportText(text, filename) {
-  if (filename.endsWith(".json")) {
-    const imported = JSON.parse(text);
-    return Array.isArray(imported.prompts) ? imported.prompts : Array.isArray(imported) ? imported : [];
-  }
-  return parseMarkdownPrompts(text);
+  return importCore.parseImportText(text, filename);
 }
 
 function showImportPreview(filename, prompts) {
@@ -815,35 +779,15 @@ function mergePrompts(prompts) {
 }
 
 function promptKey(prompt) {
-  return `${String(prompt.title || "").trim().toLowerCase()}::${String(prompt.body || "").trim()}`;
+  return importCore.promptKey(prompt);
 }
 
 function normalizePrompt(item, now = new Date().toISOString()) {
-  return {
-    id: item.id || crypto.randomUUID(),
-    title: item.title || "Imported prompt",
-    category: item.category || "Imported",
-    tags: Array.isArray(item.tags) ? item.tags : normalizeTags(String(item.tags || "")),
-    summary: item.summary || "",
-    body: item.body || item.prompt || "",
-    createdAt: item.createdAt || now,
-    updatedAt: item.updatedAt || now,
-    history: Array.isArray(item.history) ? item.history : []
-  };
+  return importCore.normalizePrompt(item, now);
 }
 
 function parseMarkdownPrompts(text) {
-  return text
-    .split(/\n---\n/g)
-    .map((block) => {
-      const title = (block.match(/^#\s+(.+)$/m) || [null, "Imported prompt"])[1];
-      const category = (block.match(/^- Category:\s*(.+)$/im) || [null, "Imported"])[1];
-      const tags = (block.match(/^- Tags:\s*(.+)$/im) || [null, ""])[1];
-      const summary = (block.match(/##\s+executive summary\s+([\s\S]*?)(?=\n##|$)/i) || [null, ""])[1]?.trim();
-      const body = (block.match(/```(?:text)?\s+([\s\S]*?)```/i) || [null, block])[1]?.trim();
-      return { title, category, tags, summary, body };
-    })
-    .filter((prompt) => prompt.body);
+  return importCore.parseMarkdownPrompts(text);
 }
 
 function formatDate(value) {

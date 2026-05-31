@@ -96,14 +96,11 @@
                 <h3>Prompts</h3>
                 <p id="promptCount">0 saved</p>
               </div>
-              <label class="sort-control">
-                <span>Sort</span>
-                <select id="sortSelect" aria-label="Sort prompts">
-                  <option value="updated">Recently updated</option>
-                  <option value="title">Title</option>
-                  <option value="risk">Audit risk</option>
-                </select>
-              </label>
+              <select id="sortSelect" aria-label="Sort prompts">
+                <option value="updated">Recently updated</option>
+                <option value="title">Title</option>
+                <option value="risk">Audit risk</option>
+              </select>
             </div>
             <div id="listStats" class="list-stats" aria-label="Prompt list stats"></div>
             <div id="promptList" class="prompt-list"></div>
@@ -247,6 +244,8 @@
       </section>
     </div>
 
+    <script src="./audit-core.js"></script>
+    <script src="./import-core.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

@@ -37,3 +37,9 @@ Moved safety audit and history behind an Audit button so the prompt editor has m
 [2026-05-31T10:32:16.194Z] DONE - Fix audit button position
 Adjusted the editor header when audit menu is open so action buttons stay top-right and the title keeps full width.
 
+[2026-05-31T10:37:01.181Z] DONE - Review Gemini technical blackboard
+Checked Gemini technical review and converted the main engineering risks into actionable open tasks.
+
+[2026-05-31T10:54:46.717Z] DONE - Restore prompt sort dropdown
+Restored the prompt sort control to the normal dropdown menu and removed the extra styled wrapper.
+
