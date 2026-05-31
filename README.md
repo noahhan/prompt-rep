@@ -1,6 +1,8 @@
 # Prompt Vault
 
-Prompt Vault is a local, offline prompt repository. It stores prompts in browser `localStorage`, supports editing, category/tag organization, reusable `{placeholder}` variables, safety auditing, JSON/Markdown import and export, executive summaries, and restorable version history.
+Prompt Vault is a repository to manage, store, and share prompts for improving AI outcomes.
+
+It is a local, offline prompt repository. It stores prompts in browser `localStorage`, supports editing, category/tag organization, reusable `{placeholder}` variables, safety auditing, JSON/Markdown import and export, executive summaries, and restorable version history.
 
 ## Run
 
