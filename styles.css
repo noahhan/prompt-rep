@@ -410,9 +410,11 @@ select:focus {
   display: block;
   width: 100%;
   overflow: hidden;
-  border: 1px solid #d4dde3;
+  border: 1px solid #cfdae2;
   border-radius: var(--radius);
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdfe 100%);
+  background:
+    radial-gradient(circle at 14px 14px, rgba(13, 148, 136, 0.09), transparent 42px),
+    linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
   padding: 0;
   text-align: left;
   transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
@@ -427,28 +429,39 @@ select:focus {
 }
 
 .prompt-card.active {
-  background: linear-gradient(180deg, #ffffff 0%, #f4fbfa 100%);
+  background:
+    radial-gradient(circle at 14px 14px, rgba(13, 148, 136, 0.14), transparent 48px),
+    linear-gradient(180deg, #ffffff 0%, #eefbf8 100%);
 }
 
 .prompt-card.active::before {
   position: absolute;
   inset: 0 auto 0 0;
-  width: 4px;
+  width: 5px;
   background: var(--accent);
   content: "";
 }
 
+.prompt-card.medium.active::before {
+  background: var(--amber);
+}
+
+.prompt-card.high.active::before {
+  background: var(--red);
+}
+
 .prompt-card-main {
   display: grid;
-  gap: 10px;
+  gap: 11px;
   min-width: 0;
-  padding: 14px 14px 13px;
+  padding: 15px 14px 14px;
 }
 
 .card-topline,
 .card-footer,
 .tag-row,
-.card-title-row {
+.card-title-row,
+.card-metrics {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -460,10 +473,18 @@ select:focus {
   justify-content: space-between;
 }
 
+.card-topline {
+  justify-content: flex-start;
+}
+
+.card-topline .risk {
+  margin-left: auto;
+}
+
 .prompt-card h4 {
   margin: 0;
   color: #111827;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.3;
 }
 
@@ -486,6 +507,30 @@ select:focus {
   line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.card-metrics span {
+  min-width: 0;
+  border: 1px solid #dbe4ea;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+  padding: 7px 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.card-metrics strong {
+  display: block;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .card-footer {
@@ -511,6 +556,7 @@ select:focus {
 }
 
 .category-pill,
+.category-token,
 .mini-tag {
   display: inline-flex;
   align-items: center;
@@ -519,6 +565,16 @@ select:focus {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 800;
+}
+
+.category-token {
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  border-radius: 8px;
+  background: #e6fffb;
+  color: var(--accent-strong);
 }
 
 .category-pill {

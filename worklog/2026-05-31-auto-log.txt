@@ -19,3 +19,6 @@ Added data/prompts.json, data/templates.json, import preview modal, stronger gui
 [2026-05-31T09:45:22.392Z] DONE - Run UI UX user test
 Tested buttons, filters, draft flow, import/export logic, guide behavior, desktop/mobile layouts, and fixed critical blackboard issues.
 
+[2026-05-31T09:58:29.015Z] DONE - Improve prompt list design
+Reviewed user's screenshot, clarified it shows native sort menu, and updated prompt list cards with stronger visual hierarchy, category token, metadata blocks, and active/risk accents.
+

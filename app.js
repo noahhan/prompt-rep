@@ -292,11 +292,14 @@ function renderPromptList() {
           const placeholderCount = getPlaceholders(prompt.body).length;
           const summary = prompt.summary || prompt.body || "No summary yet.";
           const updated = formatDate(prompt.updatedAt);
+          const category = prompt.category || "Uncategorized";
+          const categoryInitial = category.trim().charAt(0).toUpperCase() || "P";
           const tags = prompt.tags.length ? prompt.tags.map((tag) => `<span class="mini-tag">${escapeHtml(tag)}</span>`).join("") : '<span class="mini-tag muted-tag">No tags</span>';
-          return `<button class="prompt-card ${prompt.id === selectedId ? "active" : ""}" type="button" data-prompt-id="${prompt.id}">
+          return `<button class="prompt-card ${audit.level} ${prompt.id === selectedId ? "active" : ""}" type="button" data-prompt-id="${prompt.id}">
             <div class="prompt-card-main">
               <div class="card-topline">
-                <span class="category-pill"><span class="category-dot ${audit.level}"></span>${escapeHtml(prompt.category || "Uncategorized")}</span>
+                <span class="category-token" aria-hidden="true">${escapeHtml(categoryInitial)}</span>
+                <span class="category-pill"><span class="category-dot ${audit.level}"></span>${escapeHtml(category)}</span>
                 <span class="risk ${audit.level}">${risk} risk</span>
               </div>
               <div class="card-title-row">
@@ -304,6 +307,11 @@ function renderPromptList() {
                 <span class="updated-time">${updated}</span>
               </div>
               <p>${escapeHtml(summary)}</p>
+              <div class="card-metrics" aria-label="Prompt metadata">
+                <span><strong>${audit.score}</strong> audit</span>
+                <span><strong>${placeholderCount}</strong> variables</span>
+                <span><strong>${prompt.history.length}</strong> versions</span>
+              </div>
               <div class="card-footer">
                 <div class="tag-row">${tags}</div>
                 <span class="variable-count">{ } ${placeholderCount}</span>
