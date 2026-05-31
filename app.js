@@ -102,6 +102,7 @@ let state = loadState() || makeSeedState();
 let selectedId = state.prompts[0]?.id || null;
 let selectedCategory = "All";
 let selectedTag = null;
+let selectedSort = "updated";
 let selectedVersionIndex = null;
 let pendingImportPrompts = [];
 let draftPrompt = null;
@@ -272,7 +273,7 @@ function getFilteredPrompts() {
     const haystack = `${prompt.title} ${prompt.category} ${prompt.tags.join(" ")} ${prompt.summary} ${prompt.body}`.toLowerCase();
     return inCategory && inTag && (!query || haystack.includes(query));
   });
-  const sort = els.sortSelect.value;
+  const sort = selectedSort;
   return prompts.sort((a, b) => {
     if (sort === "title") return a.title.localeCompare(b.title);
     if (sort === "risk") return auditPrompt(a).score - auditPrompt(b).score;
@@ -283,6 +284,7 @@ function getFilteredPrompts() {
 function renderPromptList() {
   const prompts = getFilteredPrompts();
   els.promptCount.textContent = `${prompts.length} saved`;
+  renderSortButtons();
   renderListStats(prompts);
   els.promptList.innerHTML = prompts.length
     ? prompts
@@ -321,6 +323,14 @@ function renderPromptList() {
         })
         .join("")
     : document.querySelector("#emptyStateTemplate").innerHTML;
+}
+
+function renderSortButtons() {
+  els.sortSelect.querySelectorAll("[data-sort]").forEach((button) => {
+    const isActive = button.dataset.sort === selectedSort;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
 }
 
 function renderListStats(prompts) {
@@ -793,7 +803,12 @@ els.duplicateButton.addEventListener("click", duplicatePrompt);
 els.deleteButton.addEventListener("click", deletePrompt);
 els.restoreButton.addEventListener("click", restoreVersion);
 els.searchInput.addEventListener("input", renderPromptList);
-els.sortSelect.addEventListener("change", renderPromptList);
+els.sortSelect.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-sort]");
+  if (!button) return;
+  selectedSort = button.dataset.sort;
+  renderPromptList();
+});
 els.exportJsonButton.addEventListener("click", exportJson);
 els.exportMdButton.addEventListener("click", exportMarkdown);
 els.guideTaskSelect.addEventListener("change", renderGuide);

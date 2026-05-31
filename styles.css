@@ -348,6 +348,39 @@ button {
   font-size: 18px;
 }
 
+.sort-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 40px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #eef4f7;
+  padding: 3px;
+}
+
+.sort-segmented button {
+  min-width: 62px;
+  height: 32px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.sort-segmented button:hover {
+  color: var(--text);
+}
+
+.sort-segmented button.active {
+  background: #111827;
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.16);
+}
+
 .list-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -412,9 +445,7 @@ select:focus {
   overflow: hidden;
   border: 1px solid #cfdae2;
   border-radius: var(--radius);
-  background:
-    radial-gradient(circle at 14px 14px, rgba(13, 148, 136, 0.09), transparent 42px),
-    linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
+  background: #fff;
   padding: 0;
   text-align: left;
   transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
@@ -430,8 +461,8 @@ select:focus {
 
 .prompt-card.active {
   background:
-    radial-gradient(circle at 14px 14px, rgba(13, 148, 136, 0.14), transparent 48px),
-    linear-gradient(180deg, #ffffff 0%, #eefbf8 100%);
+    linear-gradient(90deg, rgba(13, 148, 136, 0.12), transparent 34%),
+    #f8fffd;
 }
 
 .prompt-card.active::before {
@@ -519,7 +550,7 @@ select:focus {
   min-width: 0;
   border: 1px solid #dbe4ea;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
+  background: #f8fafc;
   color: var(--muted);
   padding: 7px 8px;
   font-size: 10px;

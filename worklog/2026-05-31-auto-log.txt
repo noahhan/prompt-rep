@@ -22,3 +22,6 @@ Tested buttons, filters, draft flow, import/export logic, guide behavior, deskto
 [2026-05-31T09:58:29.015Z] DONE - Improve prompt list design
 Reviewed user's screenshot, clarified it shows native sort menu, and updated prompt list cards with stronger visual hierarchy, category token, metadata blocks, and active/risk accents.
 
+[2026-05-31T10:02:05.658Z] DONE - Replace native sort dropdown
+Changed the prompt list sort control from a native dropdown to custom segmented buttons so the visible design matches the app style.
+
