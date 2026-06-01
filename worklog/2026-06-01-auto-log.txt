@@ -1,3 +1,6 @@
 [2026-06-01T12:32:00.330Z] DONE - Improve import export safety
 Added in-app safety notices for import/export, blocked backup actions when unsaved edits exist, improved import preview duplicate counts, and disabled import when all prompts are duplicates.
 
+[2026-06-01T12:52:46.138Z] DONE - Review project files
+Reviewed tracked project files, checked ignored local files, scanned for public-repo secret risks, validated JSON data, and ran syntax checks plus unit tests.
+
