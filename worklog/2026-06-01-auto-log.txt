@@ -7,3 +7,9 @@ Reviewed tracked project files, checked ignored local files, scanned for public-
 [2026-06-01T13:00:33.543Z] DONE - Replace unsaved changes confirm
 Replaced the native unsaved-changes confirm with an in-app modal, updated navigation guards, removed the completed native-dialog task from open docs, and clarified the old prompt-guide worklog entry.
 
+[2026-06-01T13:39:50.020Z] DONE - Update blackboard priorities
+Reviewed all blackboard files and updated priorities to defer app.js module split, make IndexedDB planning the next storage step, record completed native-dialog fixes, and refresh related notes.
+
+[2026-06-01T13:42:21.567Z] DONE - Address Claude blackboard review
+Sanitized the Claude review note to remove the token value, fixed audit alias cleanup, avoided unchanged startup localStorage writes, and updated blackboard status.
+

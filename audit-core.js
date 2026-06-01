@@ -139,16 +139,13 @@
         base: 100,
         riskPenalties,
         structurePenalties,
-        qualityPenalties: structurePenalties,
         riskPenaltyTotal,
         structurePenaltyTotal,
-        qualityPenaltyTotal: structurePenaltyTotal,
         final: score
       },
       placeholders,
       riskChecks,
       structureChecks,
-      qualityChecks: structureChecks,
       suggestions: suggestions.length ? suggestions : ["No improvement needed from current audit checks."],
       exportWarning: level === "high" ? "High-risk prompt. Review before export." : "No export warning for this prompt."
     };

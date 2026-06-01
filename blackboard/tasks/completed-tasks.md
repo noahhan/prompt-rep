@@ -30,3 +30,15 @@
 - Added 17 starter prompts from the research knowledge base.
 - Added a one-time starter library merge for existing local users.
 - Matched Markdown and Preview panel heights.
+
+## 2026-06-01
+
+- Improved import/export safety with in-app notices.
+- Blocked import/export when unsaved edits exist.
+- Added detailed import preview counts for new and skipped prompts.
+- Disabled import when all prompts are duplicates.
+- Replaced native unsaved-changes confirm with an in-app modal.
+- Reviewed all project files and blackboard documents.
+- Sanitized Claude review note so no token value is stored in blackboard.
+- Removed deprecated audit `quality*` aliases.
+- Stopped startup from writing unchanged existing state to `localStorage`.

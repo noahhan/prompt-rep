@@ -80,3 +80,27 @@ Reason:
 
 - New users need useful examples immediately.
 - Existing users should not lose local saved prompts.
+
+## 2026-06-01: Defer app.js module split
+
+Decision:
+
+- Do not split `app.js` now.
+- Keep the current static-file structure for momentum.
+- Revisit module split when the app grows more or maintenance becomes painful.
+
+Reason:
+
+- The user agreed the module split is not needed immediately.
+- Storage safety and data planning are more useful next.
+
+## 2026-06-01: Replace browser-native safety dialogs
+
+Decision:
+
+- Use in-app notices and modals for import/export safety and unsaved-edit navigation.
+
+Reason:
+
+- Native browser dialogs look inconsistent with the app.
+- In-app UI gives clearer, calmer feedback.

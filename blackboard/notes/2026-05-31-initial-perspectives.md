@@ -8,11 +8,17 @@ Prompt Vault should help users not only save prompts, but choose better prompts 
 
 ## UX
 
-The prompt list was improved, but future work can add:
+Earlier idea:
 
 - Better empty state
 - More visible guide section
 - Better mobile editor navigation
+
+Current update:
+
+- The prompt guide section was removed later.
+- Useful guidance now lives in starter prompts and the LLM Wiki.
+- Mobile editor navigation is still a good future improvement.
 
 ## Prompt Engineering
 
@@ -43,5 +49,5 @@ The app is still local-first.
 
 Good next technical step:
 
-- Save prompts to `data/prompts.json`
-- Later add Git sync
+- Plan safer browser storage with IndexedDB.
+- Later add Git sync or optional online sync.

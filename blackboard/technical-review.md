@@ -14,8 +14,12 @@ The app is now stronger as a local-first prototype:
 - New prompts are draft-first.
 - The UI is cleaner, with Overview, expandable Categories, editor tabs, Preview, Audit, and History.
 - The app includes a 17-prompt starter library.
+- Import/export and unsaved-change flows now use in-app UI instead of browser-native dialogs.
+- Deprecated audit `quality*` aliases were removed.
+- Startup no longer writes unchanged existing state back to `localStorage`.
 
 The structural risks below still matter for future growth.
+The `app.js` module split is intentionally deferred for now.
 
 ### Overall Assessment: Solid Local Prototype with Architectural Debt for Future Growth
 
@@ -48,6 +52,7 @@ The "Prompt Vault" is a functional client-side application built with vanilla Ja
 
 #### 4. Monolithic `app.js` Structure
 *   **Observation:** The entire application logic resides within a single `app.js` file, with functions and variables declared globally or within a very flat scope.
+*   **Current decision:** Keep this as a known risk, but do not fix it immediately.
 *   **Future Problems:**
     *   **Code Organization & Navigability:** Hard to quickly find relevant code sections in a large file.
     *   **Increased Coupling:** Tight coupling between disparate parts of the application makes changes risky and increases the chance of unintended side effects.
@@ -55,7 +60,7 @@ The "Prompt Vault" is a functional client-side application built with vanilla Ja
     *   **Name Collisions:** Higher risk of accidental variable or function name collisions if more developers contribute or if third-party libraries are integrated.
 
 #### 5. Limited and Manual Error Handling
-*   **Observation:** Error handling is improved in some flows, but still depends on basic `try...catch`, native dialogs, and local UI messages.
+*   **Observation:** Error handling is improved in key flows and now uses local UI messages instead of native dialogs for import/export and unsaved edits. Some lower-level error handling is still basic.
 *   **Future Problems:**
     *   **Poor User Experience:** `alert()` dialogs are disruptive and unhelpful for a modern application.
     *   **Lack of Robustness:** The application might fail silently or crash without informative feedback or proper recovery mechanisms for various edge cases (e.g., malformed data, network issues if extended).

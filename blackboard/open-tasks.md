@@ -38,6 +38,7 @@ Strong points:
 High value:
 
 - Improve mobile editing flow.
+- Plan IndexedDB storage for larger prompt libraries.
 - Add keyboard shortcuts for Save, New prompt, Search, and Preview.
 - Add favorites or pinned prompts.
 
@@ -46,6 +47,7 @@ Medium value:
 - Add bulk actions for export, category move, and cleanup.
 - Add compact and comfortable density options.
 - Add a clear settings area for storage, import/export, and future sync.
+- Add configurable audit rules.
 
 Low value:
 

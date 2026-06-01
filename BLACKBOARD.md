@@ -1,6 +1,6 @@
 # Prompt Vault Blackboard
 
-_Last updated: 2026-05-31_
+_Last updated: 2026-06-01_
 
 This file is the root summary for important project status.
 
@@ -34,6 +34,8 @@ The earlier critical issues were fixed on 2026-05-31:
 - Unsaved edits are protected before switching prompts.
 - Category creation uses an inline form instead of browser `prompt()`.
 - Empty categories can be removed safely.
+- Import/export safety uses in-app notices.
+- Unsaved edit navigation uses an in-app modal instead of browser `confirm()`.
 
 ## Current UI Decisions
 
@@ -65,7 +67,6 @@ Existing local users receive these starter prompts once. Saved local prompts are
 
 High priority:
 
-- `app.js` is still large and should be split into modules.
 - State is still mostly global and mutable.
 - `localStorage` is fine for now, but IndexedDB is better for larger libraries.
 - Online sync is not built yet.
@@ -78,8 +79,8 @@ Medium priority:
 
 ## Next Good Steps
 
-1. Split `app.js` into storage, state, audit, import/export, and UI modules.
-2. Add a safer data layer plan: IndexedDB first, optional sync later.
-3. Add configurable audit rules.
-4. Improve mobile editor flow.
-5. Create a clear Git sync or online sync design before implementation.
+1. Add a safer data layer plan: IndexedDB first, optional sync later.
+2. Add configurable audit rules.
+3. Improve mobile editor flow.
+4. Create a clear Git sync or online sync design before implementation.
+5. Defer `app.js` module split until the app grows more or the user asks for it.

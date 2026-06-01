@@ -150,15 +150,15 @@ function loadState() {
 async function loadDataFileIfEmpty() {
   try {
     const response = await fetch("./data/prompts.json", { cache: "no-store" });
-    if (!response.ok) return;
+    if (!response.ok) return false;
     const data = await response.json();
     const prompts = Array.isArray(data.prompts) ? data.prompts : [];
-    if (!prompts.length) return;
+    if (!prompts.length) return false;
     if (localStorage.getItem(STORAGE_KEY)) {
-      if (localStorage.getItem(STARTER_LIBRARY_KEY) === STARTER_LIBRARY_VERSION) return;
+      if (localStorage.getItem(STARTER_LIBRARY_KEY) === STARTER_LIBRARY_VERSION) return false;
       mergeStarterLibrary(data);
       localStorage.setItem(STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
-      return;
+      return true;
     }
     state = {
       categories: Array.isArray(data.categories) ? data.categories : [...new Set(prompts.map((prompt) => prompt.category).filter(Boolean))],
@@ -167,8 +167,10 @@ async function loadDataFileIfEmpty() {
     selectedId = state.prompts[0]?.id || null;
     selectedCategory = state.prompts[0]?.category || state.categories[0] || null;
     localStorage.setItem(STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
+    return true;
   } catch {
     // Direct file opening cannot fetch local JSON. Seed data is used instead.
+    return false;
   }
 }
 
@@ -585,8 +587,8 @@ function refreshAuditFromEditor() {
 
 function renderAuditBreakdown(audit) {
   const riskPenaltyText = audit.breakdown.riskPenaltyTotal ? `-${audit.breakdown.riskPenaltyTotal}` : "0";
-  const structurePenaltyTotal = audit.breakdown.structurePenaltyTotal ?? audit.breakdown.qualityPenaltyTotal;
-  const structurePenalties = audit.breakdown.structurePenalties || audit.breakdown.qualityPenalties || [];
+  const structurePenaltyTotal = audit.breakdown.structurePenaltyTotal;
+  const structurePenalties = audit.breakdown.structurePenalties;
   const structurePenaltyText = structurePenaltyTotal ? `-${structurePenaltyTotal}` : "0";
   const riskDetails = audit.breakdown.riskPenalties.length
     ? audit.breakdown.riskPenalties.map((penalty) => `<span>${escapeHtml(penalty.id)} -${penalty.points} ${escapeHtml(penalty.label)}</span>`).join("")
@@ -622,7 +624,7 @@ function renderAuditDetails(audit) {
   const riskFactors = (audit.riskChecks || audit.breakdown.riskPenalties)
     .map((factor) => `<li class="${factor.status === "review" || (factor.level === "high" && factor.points) ? "review" : ""}"><strong><b class="factor-id">${escapeHtml(factor.id)}</b>${escapeHtml(factor.label)}</strong><span>${factor.points ? `-${factor.points}` : "0"} points - ${escapeHtml(factor.detail)}</span></li>`)
     .join("");
-  const checks = (audit.structureChecks || audit.qualityChecks)
+  const checks = audit.structureChecks
     .map((check) => `<li class="${check.status}"><strong><b class="factor-id">${escapeHtml(check.id)}</b>${escapeHtml(check.label)}</strong><span>${check.points ? `-${check.points}` : "0"} points - ${escapeHtml(check.detail)}</span></li>`)
     .join("");
   const suggestions = audit.suggestions.map((suggestion) => `<li>${escapeHtml(suggestion)}</li>`).join("");
@@ -1269,8 +1271,9 @@ document.addEventListener("click", (event) => {
 });
 
 async function initApp() {
-  await loadDataFileIfEmpty();
-  saveState();
+  const hadStoredState = Boolean(localStorage.getItem(STORAGE_KEY));
+  const changed = await loadDataFileIfEmpty();
+  if (changed || !hadStoredState) saveState();
   render();
 }
 
