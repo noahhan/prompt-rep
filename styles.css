@@ -1173,18 +1173,28 @@ label {
   line-height: 1.5;
 }
 
-.delete-modal {
+.delete-modal,
+.unsaved-modal {
   width: min(460px, 100%);
 }
 
-.delete-summary {
+.delete-summary,
+.unsaved-summary {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  border: 1px solid var(--red-soft);
   border-radius: var(--radius);
-  background: #fff7f6;
   padding: 13px;
+}
+
+.delete-summary {
+  border: 1px solid var(--red-soft);
+  background: #fff7f6;
+}
+
+.unsaved-summary {
+  border: 1px solid var(--amber-soft);
+  background: #fffaf0;
 }
 
 .delete-summary [data-icon] {
@@ -1198,7 +1208,8 @@ label {
   color: var(--red);
 }
 
-.delete-summary strong {
+.delete-summary strong,
+.unsaved-summary strong {
   display: block;
   margin-bottom: 3px;
   color: var(--text);

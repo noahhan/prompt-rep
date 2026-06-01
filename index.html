@@ -276,6 +276,30 @@
       </section>
     </div>
 
+    <div id="unsavedChangesModal" class="modal-backdrop" hidden>
+      <section class="modal unsaved-modal" role="dialog" aria-modal="true" aria-labelledby="unsavedChangesTitle">
+        <div class="modal-head">
+          <div>
+            <h2 id="unsavedChangesTitle">Unsaved changes</h2>
+            <p>Your current prompt has changes that are not saved yet.</p>
+          </div>
+          <button id="cancelUnsavedButton" class="icon-button" type="button" aria-label="Keep editing">
+            <span data-icon="x"></span>
+          </button>
+        </div>
+        <div class="unsaved-summary">
+          <div>
+            <strong>Keep editing or discard changes?</strong>
+            <p>Discard will return this prompt to the last saved version.</p>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="cancelUnsavedTextButton" class="button ghost" type="button">Keep editing</button>
+          <button id="confirmUnsavedButton" class="button danger" type="button">Discard changes</button>
+        </div>
+      </section>
+    </div>
+
     <script src="./audit-core.js"></script>
     <script src="./import-core.js"></script>
     <script src="./app.js"></script>

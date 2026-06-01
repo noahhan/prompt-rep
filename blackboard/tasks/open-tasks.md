@@ -13,7 +13,6 @@
 - Add more safety audit rules.
 - Improve mobile editor workflow.
 - Move safety audit rules into configurable data instead of hardcoded regex rules.
-- Replace remaining native alerts/confirms with in-app toast or modal feedback.
 - Plan IndexedDB migration for larger local prompt libraries.
 - Add optional online sync plan that is safe for a public repository.
 

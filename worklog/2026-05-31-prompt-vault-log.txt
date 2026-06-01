@@ -17,9 +17,9 @@ Task 4: Create LLM Wiki knowledge base
 Status: Done
 Summary: Created a local LLM Wiki structure for managing prompt-engineering knowledge.
 
-Task 5: Add prompt guide panel
+Task 5: Add prompt guide panel (later removed)
 Status: Done
-Summary: Added in-app task guide with prompt patterns and scaffold insertion.
+Summary: Added in-app task guide with prompt patterns and scaffold insertion. Later UI work removed this panel and moved the useful knowledge into starter prompts and the LLM Wiki.
 
 Verification:
 - node --check app.js passed.

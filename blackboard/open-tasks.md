@@ -38,7 +38,6 @@ Strong points:
 High value:
 
 - Improve mobile editing flow.
-- Replace remaining browser-native alerts or confirms with in-app UI.
 - Add keyboard shortcuts for Save, New prompt, Search, and Preview.
 - Add favorites or pinned prompts.
 

@@ -72,6 +72,10 @@ const els = {
   cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
   cancelDeleteTextButton: document.querySelector("#cancelDeleteTextButton"),
   appNotice: document.querySelector("#appNotice"),
+  unsavedChangesModal: document.querySelector("#unsavedChangesModal"),
+  confirmUnsavedButton: document.querySelector("#confirmUnsavedButton"),
+  cancelUnsavedButton: document.querySelector("#cancelUnsavedButton"),
+  cancelUnsavedTextButton: document.querySelector("#cancelUnsavedTextButton"),
   editorTabButtons: document.querySelectorAll("[data-editor-tab]"),
   promptTabPanel: document.querySelector("#promptTabPanel"),
   auditTabPanel: document.querySelector("#auditTabPanel"),
@@ -95,6 +99,7 @@ let activeEditorTab = "prompt";
 let activeBodyView = "markdown";
 let workspaceView = "editor";
 let noticeTimer = null;
+let pendingDiscardAction = null;
 const expandedCategories = new Set([state.prompts[0]?.category].filter(Boolean));
 
 function makeSeedState() {
@@ -661,28 +666,29 @@ function renderHistory(prompt) {
 }
 
 function createPrompt() {
-  if (!confirmPendingEditorChanges()) return;
-  const now = new Date().toISOString();
-  draftPrompt = {
-    id: "__draft__",
-    title: "Untitled prompt",
-    category: selectedCategory || state.categories[0] || "Writing",
-    tags: [],
-    summary: "",
-    body: "Use this prompt for {task}.\n\nContext:\n{context}\n\nOutput format:\n{format}",
-    createdAt: now,
-    updatedAt: now,
-    history: []
-  };
-  selectedId = "__draft__";
-  selectedVersionIndex = null;
-  selectedTag = null;
-  workspaceView = "editor";
-  activeEditorTab = "prompt";
-  hasUnsavedChanges = false;
-  render();
-  els.titleInput.focus();
-  els.titleInput.select();
+  withPendingEditorConfirmation(() => {
+    const now = new Date().toISOString();
+    draftPrompt = {
+      id: "__draft__",
+      title: "Untitled prompt",
+      category: selectedCategory || state.categories[0] || "Writing",
+      tags: [],
+      summary: "",
+      body: "Use this prompt for {task}.\n\nContext:\n{context}\n\nOutput format:\n{format}",
+      createdAt: now,
+      updatedAt: now,
+      history: []
+    };
+    selectedId = "__draft__";
+    selectedVersionIndex = null;
+    selectedTag = null;
+    workspaceView = "editor";
+    activeEditorTab = "prompt";
+    hasUnsavedChanges = false;
+    render();
+    els.titleInput.focus();
+    els.titleInput.select();
+  });
 }
 
 function saveCurrentPrompt(event) {
@@ -719,25 +725,26 @@ function saveCurrentPrompt(event) {
 }
 
 function duplicatePrompt() {
-  if (!confirmPendingEditorChanges()) return;
-  const prompt = getSelectedPrompt();
-  if (!prompt || selectedId === "__draft__") return;
-  const now = new Date().toISOString();
-  const copy = {
-    ...structuredClone(prompt),
-    id: crypto.randomUUID(),
-    title: `${prompt.title} copy`,
-    createdAt: now,
-    updatedAt: now,
-    history: []
-  };
-  state.prompts.unshift(copy);
-  selectedId = copy.id;
-  selectedVersionIndex = null;
-  workspaceView = "editor";
-  activeEditorTab = "prompt";
-  saveState();
-  render();
+  withPendingEditorConfirmation(() => {
+    const prompt = getSelectedPrompt();
+    if (!prompt || selectedId === "__draft__") return;
+    const now = new Date().toISOString();
+    const copy = {
+      ...structuredClone(prompt),
+      id: crypto.randomUUID(),
+      title: `${prompt.title} copy`,
+      createdAt: now,
+      updatedAt: now,
+      history: []
+    };
+    state.prompts.unshift(copy);
+    selectedId = copy.id;
+    selectedVersionIndex = null;
+    workspaceView = "editor";
+    activeEditorTab = "prompt";
+    saveState();
+    render();
+  });
 }
 
 function deletePrompt() {
@@ -779,26 +786,27 @@ function confirmDeletePrompt() {
 }
 
 function restoreVersion() {
-  if (!confirmPendingEditorChanges()) return;
-  const prompt = getSelectedPrompt();
-  if (!prompt || selectedVersionIndex === null) return;
-  const version = prompt.history[selectedVersionIndex];
-  if (!version) return;
-  const current = { ...prompt, history: undefined };
-  prompt.history = [current, ...prompt.history].slice(0, 30);
-  Object.assign(prompt, {
-    title: version.title,
-    category: version.category,
-    tags: version.tags || [],
-    summary: version.summary || "",
-    body: version.body || "",
-    updatedAt: new Date().toISOString()
+  withPendingEditorConfirmation(() => {
+    const prompt = getSelectedPrompt();
+    if (!prompt || selectedVersionIndex === null) return;
+    const version = prompt.history[selectedVersionIndex];
+    if (!version) return;
+    const current = { ...prompt, history: undefined };
+    prompt.history = [current, ...prompt.history].slice(0, 30);
+    Object.assign(prompt, {
+      title: version.title,
+      category: version.category,
+      tags: version.tags || [],
+      summary: version.summary || "",
+      body: version.body || "",
+      updatedAt: new Date().toISOString()
+    });
+    ensureCategory(prompt.category);
+    selectedVersionIndex = null;
+    hasUnsavedChanges = false;
+    saveState();
+    render();
   });
-  ensureCategory(prompt.category);
-  selectedVersionIndex = null;
-  hasUnsavedChanges = false;
-  saveState();
-  render();
 }
 
 function markEditorDirty() {
@@ -814,9 +822,29 @@ function hasPendingEditorChanges() {
   return selectedId === "__draft__" || hasUnsavedChanges;
 }
 
-function confirmPendingEditorChanges() {
-  if (!hasPendingEditorChanges()) return true;
-  return confirm("You have unsaved changes. Continue and discard them?");
+function withPendingEditorConfirmation(action) {
+  if (!hasPendingEditorChanges()) {
+    action();
+    return;
+  }
+  pendingDiscardAction = action;
+  els.unsavedChangesModal.hidden = false;
+  renderIcons(els.unsavedChangesModal);
+  els.confirmUnsavedButton.focus();
+}
+
+function closeUnsavedChangesModal() {
+  pendingDiscardAction = null;
+  els.unsavedChangesModal.hidden = true;
+}
+
+function confirmDiscardChanges() {
+  const action = pendingDiscardAction;
+  pendingDiscardAction = null;
+  els.unsavedChangesModal.hidden = true;
+  draftPrompt = null;
+  hasUnsavedChanges = false;
+  if (action) action();
 }
 
 function showNotice(message, type = "success") {
@@ -850,12 +878,11 @@ function setCategoryControlValue(category) {
 }
 
 function addCategory() {
-  if (!confirmPendingEditorChanges()) return;
-  draftPrompt = null;
-  hasUnsavedChanges = false;
-  categoryFormOpen = true;
-  render();
-  els.categoryNameInput.focus();
+  withPendingEditorConfirmation(() => {
+    categoryFormOpen = true;
+    render();
+    els.categoryNameInput.focus();
+  });
 }
 
 function closeCategoryForm() {
@@ -1118,16 +1145,18 @@ els.deleteButton.addEventListener("click", deletePrompt);
 els.confirmDeleteButton.addEventListener("click", confirmDeletePrompt);
 els.cancelDeleteButton.addEventListener("click", closeDeletePromptModal);
 els.cancelDeleteTextButton.addEventListener("click", closeDeletePromptModal);
+els.confirmUnsavedButton.addEventListener("click", confirmDiscardChanges);
+els.cancelUnsavedButton.addEventListener("click", closeUnsavedChangesModal);
+els.cancelUnsavedTextButton.addEventListener("click", closeUnsavedChangesModal);
 els.refreshAuditButton.addEventListener("click", refreshAuditFromEditor);
 els.restoreButton.addEventListener("click", restoreVersion);
 els.overviewButton.addEventListener("click", () => {
-  if (!confirmPendingEditorChanges()) return;
-  draftPrompt = null;
-  hasUnsavedChanges = false;
-  workspaceView = "overview";
-  selectedCategory = null;
-  activeEditorTab = "prompt";
-  render();
+  withPendingEditorConfirmation(() => {
+    workspaceView = "overview";
+    selectedCategory = null;
+    activeEditorTab = "prompt";
+    render();
+  });
 });
 els.searchInput.addEventListener("input", () => {
   renderCategories();
@@ -1194,41 +1223,43 @@ document.addEventListener("click", (event) => {
   }
   const categoryButton = event.target.closest("[data-category]");
   if (categoryButton) {
-    if (!confirmPendingEditorChanges()) return;
-    draftPrompt = null;
-    hasUnsavedChanges = false;
-    selectedCategory = categoryButton.dataset.category;
-    if (expandedCategories.has(selectedCategory)) {
-      expandedCategories.delete(selectedCategory);
-    } else {
-      expandedCategories.add(selectedCategory);
-    }
-    selectedTag = null;
-    selectFirstVisiblePrompt();
-    workspaceView = "editor";
-    render();
+    withPendingEditorConfirmation(() => {
+      selectedCategory = categoryButton.dataset.category;
+      if (expandedCategories.has(selectedCategory)) {
+        expandedCategories.delete(selectedCategory);
+      } else {
+        expandedCategories.add(selectedCategory);
+      }
+      selectedTag = null;
+      selectFirstVisiblePrompt();
+      workspaceView = "editor";
+      render();
+    });
   }
   const tagButton = event.target.closest("[data-tag]");
   if (tagButton) {
-    if (!confirmPendingEditorChanges()) return;
-    draftPrompt = null;
-    hasUnsavedChanges = false;
-    selectedTag = selectedTag === tagButton.dataset.tag ? null : tagButton.dataset.tag;
-    selectedCategory = null;
-    selectFirstVisiblePrompt();
-    workspaceView = "editor";
-    render();
+    withPendingEditorConfirmation(() => {
+      selectedTag = selectedTag === tagButton.dataset.tag ? null : tagButton.dataset.tag;
+      selectedCategory = null;
+      selectFirstVisiblePrompt();
+      workspaceView = "editor";
+      render();
+    });
   }
   const promptButton = event.target.closest("[data-prompt-id]");
   if (promptButton) {
-    if (promptButton.dataset.promptId !== selectedId && !confirmPendingEditorChanges()) return;
-    draftPrompt = null;
-    hasUnsavedChanges = false;
-    selectedId = promptButton.dataset.promptId;
-    selectedVersionIndex = null;
-    workspaceView = "editor";
-    activeEditorTab = "prompt";
-    render();
+    const selectPrompt = () => {
+      selectedId = promptButton.dataset.promptId;
+      selectedVersionIndex = null;
+      workspaceView = "editor";
+      activeEditorTab = "prompt";
+      render();
+    };
+    if (promptButton.dataset.promptId !== selectedId) {
+      withPendingEditorConfirmation(selectPrompt);
+    } else {
+      selectPrompt();
+    }
   }
   const versionButton = event.target.closest("[data-version-index]");
   if (versionButton) {

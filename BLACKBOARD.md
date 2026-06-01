@@ -74,7 +74,6 @@ Medium priority:
 
 - Audit rules are useful but still hardcoded.
 - Mobile editing can be improved.
-- Some native alerts/confirms may still need custom UI.
 - Public repository safety must stay strict. Never commit `.env`, tokens, or secrets.
 
 ## Next Good Steps

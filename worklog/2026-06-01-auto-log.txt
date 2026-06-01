@@ -4,3 +4,6 @@ Added in-app safety notices for import/export, blocked backup actions when unsav
 [2026-06-01T12:52:46.138Z] DONE - Review project files
 Reviewed tracked project files, checked ignored local files, scanned for public-repo secret risks, validated JSON data, and ran syntax checks plus unit tests.
 
+[2026-06-01T13:00:33.543Z] DONE - Replace unsaved changes confirm
+Replaced the native unsaved-changes confirm with an in-app modal, updated navigation guards, removed the completed native-dialog task from open docs, and clarified the old prompt-guide worklog entry.
+
