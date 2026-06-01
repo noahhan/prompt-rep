@@ -1,0 +1,3 @@
+[2026-06-01T12:32:00.330Z] DONE - Improve import export safety
+Added in-app safety notices for import/export, blocked backup actions when unsaved edits exist, improved import preview duplicate counts, and disabled import when all prompts are duplicates.
+

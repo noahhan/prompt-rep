@@ -71,6 +71,7 @@ const els = {
   confirmDeleteButton: document.querySelector("#confirmDeleteButton"),
   cancelDeleteButton: document.querySelector("#cancelDeleteButton"),
   cancelDeleteTextButton: document.querySelector("#cancelDeleteTextButton"),
+  appNotice: document.querySelector("#appNotice"),
   editorTabButtons: document.querySelectorAll("[data-editor-tab]"),
   promptTabPanel: document.querySelector("#promptTabPanel"),
   auditTabPanel: document.querySelector("#auditTabPanel"),
@@ -93,6 +94,7 @@ let categoryFormOpen = false;
 let activeEditorTab = "prompt";
 let activeBodyView = "markdown";
 let workspaceView = "editor";
+let noticeTimer = null;
 const expandedCategories = new Set([state.prompts[0]?.category].filter(Boolean));
 
 function makeSeedState() {
@@ -817,9 +819,15 @@ function confirmPendingEditorChanges() {
   return confirm("You have unsaved changes. Continue and discard them?");
 }
 
-function confirmRepositoryAction(message) {
-  if (!hasPendingEditorChanges()) return true;
-  return confirm(message);
+function showNotice(message, type = "success") {
+  if (!els.appNotice) return;
+  if (noticeTimer) clearTimeout(noticeTimer);
+  els.appNotice.textContent = message;
+  els.appNotice.className = `app-notice ${type}`;
+  els.appNotice.hidden = false;
+  noticeTimer = setTimeout(() => {
+    els.appNotice.hidden = true;
+  }, 4200);
 }
 
 function ensureCategory(category) {
@@ -893,12 +901,19 @@ function removeEmptyCategory(category) {
 }
 
 function exportJson() {
-  if (!confirmRepositoryAction("Export includes saved prompts only. Unsaved changes will not be included. Continue?")) return;
+  if (hasPendingEditorChanges()) {
+    showNotice("Save your current prompt before export. Unsaved changes are not included in backups.", "warn");
+    return;
+  }
   downloadFile(`prompt-vault-${dateStamp()}.json`, JSON.stringify(state, null, 2), "application/json");
+  showNotice("JSON backup downloaded. Keep it somewhere safe.", "success");
 }
 
 function exportMarkdown() {
-  if (!confirmRepositoryAction("Export includes saved prompts only. Unsaved changes will not be included. Continue?")) return;
+  if (hasPendingEditorChanges()) {
+    showNotice("Save your current prompt before export. Unsaved changes are not included in backups.", "warn");
+    return;
+  }
   const md = state.prompts
     .map((prompt) => {
       const audit = auditPrompt(prompt);
@@ -922,6 +937,7 @@ ${prompt.body}
     })
     .join("\n---\n\n");
   downloadFile(`prompt-vault-${dateStamp()}.md`, md, "text/markdown");
+  showNotice("Markdown export downloaded. JSON is better for full backup and history.", "success");
 }
 
 function downloadFile(filename, content, type) {
@@ -941,7 +957,7 @@ function importFile(file) {
       pendingImportPrompts = parseImportText(String(reader.result || ""), file.name);
       showImportPreview(file.name, pendingImportPrompts);
     } catch (error) {
-      alert(`Import failed: ${error.message}`);
+      showNotice(`Import failed: ${error.message}`, "warn");
     }
   };
   reader.readAsText(file);
@@ -953,20 +969,26 @@ function parseImportText(text, filename) {
 
 function showImportPreview(filename, prompts) {
   if (!prompts.length) {
-    alert("No prompts found in this file.");
+    showNotice("No prompts found in this file.", "warn");
     return;
   }
-  const existingTitles = new Set(state.prompts.map((prompt) => prompt.title.trim().toLowerCase()));
-  const duplicates = prompts.filter((prompt) => existingTitles.has(String(prompt.title || "").trim().toLowerCase())).length;
+  const analysis = analyzeImportPrompts(prompts);
   const categories = [...new Set(prompts.map((prompt) => prompt.category || "Imported"))];
   const highRisk = prompts.filter((prompt) => auditPrompt(normalizePrompt(prompt)).level === "high").length;
   els.importPreviewBody.innerHTML = `
     <div class="preview-grid">
       <span><strong>${prompts.length}</strong> prompts</span>
       <span><strong>${categories.length}</strong> categories</span>
-      <span><strong>${duplicates}</strong> duplicates</span>
-      <span><strong>${highRisk}</strong> high risk</span>
+      <span><strong>${analysis.added}</strong> new</span>
+      <span><strong>${analysis.skipped}</strong> skipped</span>
     </div>
+    <div class="preview-grid compact">
+      <span><strong>${highRisk}</strong> high risk</span>
+      <span><strong>${analysis.duplicateExisting}</strong> already saved</span>
+      <span><strong>${analysis.duplicateInFile}</strong> repeated in file</span>
+      <span><strong>${state.prompts.length}</strong> current saved</span>
+    </div>
+    <p class="import-safety-note"><strong>Safety:</strong> Import adds new prompts only. It does not overwrite your saved prompts. Exact duplicates are skipped.</p>
     <p><strong>File:</strong> ${escapeHtml(filename)}</p>
     <p><strong>Categories:</strong> ${categories.map(escapeHtml).join(", ")}</p>
     <div class="preview-list">
@@ -980,23 +1002,27 @@ function showImportPreview(filename, prompts) {
         .join("")}
     </div>
   `;
+  els.confirmImportButton.disabled = analysis.added === 0;
   els.importPreviewModal.hidden = false;
   renderIcons(els.importPreviewModal);
 }
 
 function closeImportPreview() {
   pendingImportPrompts = [];
+  els.confirmImportButton.disabled = false;
   els.importPreviewModal.hidden = true;
 }
 
 function confirmImportPreview() {
-  mergePrompts(pendingImportPrompts);
+  const result = mergePrompts(pendingImportPrompts);
   pendingImportPrompts = [];
+  els.confirmImportButton.disabled = false;
   selectedCategory = null;
   selectedTag = null;
   els.importPreviewModal.hidden = true;
   saveState();
   render();
+  showNotice(`Import complete. Added ${result.added} prompt${result.added === 1 ? "" : "s"}, skipped ${result.skipped} duplicate${result.skipped === 1 ? "" : "s"}.`, "success");
 }
 
 function mergePrompts(prompts) {
@@ -1004,18 +1030,53 @@ function mergePrompts(prompts) {
   const existingKeys = new Set(state.prompts.map((prompt) => promptKey(prompt)));
   const existingIds = new Set(state.prompts.map((prompt) => prompt.id));
   let firstImportedId = null;
+  let added = 0;
+  let skipped = 0;
   prompts.forEach((item) => {
     const prompt = normalizePrompt(item, now);
     if (existingIds.has(prompt.id)) prompt.id = crypto.randomUUID();
     const key = promptKey(prompt);
-    if (existingKeys.has(key)) return;
+    if (existingKeys.has(key)) {
+      skipped += 1;
+      return;
+    }
     ensureCategory(prompt.category);
     state.prompts.unshift(prompt);
     existingKeys.add(key);
     existingIds.add(prompt.id);
+    added += 1;
     if (!firstImportedId) firstImportedId = prompt.id;
   });
   if (firstImportedId) selectedId = firstImportedId;
+  return { added, skipped };
+}
+
+function analyzeImportPrompts(prompts) {
+  const existingKeys = new Set(state.prompts.map((prompt) => promptKey(prompt)));
+  const fileKeys = new Set();
+  let added = 0;
+  let duplicateExisting = 0;
+  let duplicateInFile = 0;
+  prompts.forEach((item) => {
+    const prompt = normalizePrompt(item);
+    const key = promptKey(prompt);
+    if (existingKeys.has(key)) {
+      duplicateExisting += 1;
+      return;
+    }
+    if (fileKeys.has(key)) {
+      duplicateInFile += 1;
+      return;
+    }
+    fileKeys.add(key);
+    added += 1;
+  });
+  return {
+    added,
+    duplicateExisting,
+    duplicateInFile,
+    skipped: duplicateExisting + duplicateInFile
+  };
 }
 
 function promptKey(prompt) {
@@ -1092,7 +1153,10 @@ els.bodyViewButtons.forEach((button) => {
   });
 });
 els.importButton.addEventListener("click", () => {
-  if (!confirmRepositoryAction("Import adds prompts to saved data. Unsaved changes will not be included. Continue?")) return;
+  if (hasPendingEditorChanges()) {
+    showNotice("Save your current prompt before import. This protects unsaved work.", "warn");
+    return;
+  }
   els.importFile.click();
 });
 els.importFile.addEventListener("change", (event) => {
