@@ -65,11 +65,20 @@ Cons:
 
 ## Recommendation
 
-Start with Git sync or file-based backup.
+Start with safer local storage before sync.
 
 Keep online support optional. The offline app should continue working without login or network.
 
-Next implementation:
+Immediate local-first step:
+
+1. Review `blackboard/decisions/indexeddb-migration-plan.md`.
+2. Keep JSON export/import as backup.
+3. Migrate browser storage from `localStorage` to IndexedDB.
+4. Keep `localStorage` fallback for one app version.
+
+After local storage is stable, consider Git sync or file-based backup.
+
+Possible sync implementation:
 
 1. Export prompts to `data/prompts.json`.
 2. Save prompt versions to files.

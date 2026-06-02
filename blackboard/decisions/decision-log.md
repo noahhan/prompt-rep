@@ -118,3 +118,17 @@ Reason:
 - The current app is already usable.
 - A long task list makes the next step unclear.
 - Storage safety protects user data and should come before bigger features.
+
+## 2026-06-02: Plan IndexedDB before implementation
+
+Decision:
+
+- Write and review an IndexedDB migration plan before changing storage code.
+- Keep JSON import/export as the backup path.
+- Keep `localStorage` fallback for one app version after migration.
+
+Reason:
+
+- User data safety is more important than fast implementation.
+- Existing saved prompts must not be lost.
+- Offline-first behavior must remain.

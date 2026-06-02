@@ -13,7 +13,7 @@ Reason:
 
 ## Necessary Next
 
-- Create an IndexedDB migration plan for larger prompt libraries.
+- Review and approve `blackboard/decisions/indexeddb-migration-plan.md`.
 - Keep JSON export/import as the human-readable backup path.
 - Decide how `localStorage` data will migrate without losing current prompts.
 
@@ -22,6 +22,13 @@ Reason:
 - Current `localStorage` is fine for small use.
 - Larger prompt libraries need safer browser storage.
 - Planning first lowers the risk of data loss.
+
+## Ready For Implementation After Approval
+
+- Add `storage-core.js`.
+- Migrate current `localStorage` data into IndexedDB.
+- Keep `localStorage` fallback for one app version.
+- Keep current UI behavior unchanged.
 
 ## Useful After Storage
 

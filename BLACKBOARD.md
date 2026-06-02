@@ -73,6 +73,7 @@ Necessary next:
 
 - `localStorage` is fine for now, but IndexedDB is better for larger libraries.
 - Data migration must protect existing saved prompts.
+- IndexedDB migration plan is in `blackboard/decisions/indexeddb-migration-plan.md`.
 
 Useful after storage:
 
@@ -83,7 +84,7 @@ Useful after storage:
 ## Next Good Steps
 
 1. Revoke the local GitHub token in GitHub settings.
-2. Create an IndexedDB migration plan.
+2. Review and approve the IndexedDB migration plan.
 3. Keep JSON export/import as the backup path.
 4. Move audit rules into configurable data after storage planning.
 5. Improve mobile editor flow when core storage is stable.

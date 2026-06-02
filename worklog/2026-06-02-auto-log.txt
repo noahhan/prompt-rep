@@ -1,3 +1,6 @@
 [2026-06-02T13:50:02.359Z] DONE - Audit task necessity
 Reviewed remaining tasks and reduced the roadmap to necessary work only: token revocation, IndexedDB migration planning, backup path, then optional audit/mobile improvements.
 
+[2026-06-02T13:53:53.352Z] DONE - Create IndexedDB migration plan
+Created and linked an IndexedDB migration plan with data shape, migration rules, backup rules, failure handling, implementation steps, and success criteria.
+
