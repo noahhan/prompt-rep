@@ -104,3 +104,17 @@ Reason:
 
 - Native browser dialogs look inconsistent with the app.
 - In-app UI gives clearer, calmer feedback.
+
+## 2026-06-02: Keep only necessary active tasks
+
+Decision:
+
+- Keep token revocation and IndexedDB planning as the only necessary immediate tasks.
+- Treat audit configuration and mobile workflow as useful next tasks.
+- Move sync, keyboard shortcuts, favorites, bulk actions, themes, build tooling, and module splitting to optional or deferred.
+
+Reason:
+
+- The current app is already usable.
+- A long task list makes the next step unclear.
+- Storage safety protects user data and should come before bigger features.

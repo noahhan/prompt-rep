@@ -1,6 +1,6 @@
 # Prompt Vault Blackboard
 
-_Last updated: 2026-06-01_
+_Last updated: 2026-06-02_
 
 This file is the root summary for important project status.
 
@@ -65,13 +65,16 @@ Existing local users receive these starter prompts once. Saved local prompts are
 
 ## Current Risks
 
-High priority:
+Urgent:
 
-- State is still mostly global and mutable.
+- Revoke the GitHub token that was found in local `.env`.
+
+Necessary next:
+
 - `localStorage` is fine for now, but IndexedDB is better for larger libraries.
-- Online sync is not built yet.
+- Data migration must protect existing saved prompts.
 
-Medium priority:
+Useful after storage:
 
 - Audit rules are useful but still hardcoded.
 - Mobile editing can be improved.
@@ -79,8 +82,14 @@ Medium priority:
 
 ## Next Good Steps
 
-1. Add a safer data layer plan: IndexedDB first, optional sync later.
-2. Add configurable audit rules.
-3. Improve mobile editor flow.
-4. Create a clear Git sync or online sync design before implementation.
-5. Defer `app.js` module split until the app grows more or the user asks for it.
+1. Revoke the local GitHub token in GitHub settings.
+2. Create an IndexedDB migration plan.
+3. Keep JSON export/import as the backup path.
+4. Move audit rules into configurable data after storage planning.
+5. Improve mobile editor flow when core storage is stable.
+
+Deferred:
+
+- `app.js` module split.
+- ES module conversion.
+- Online sync.

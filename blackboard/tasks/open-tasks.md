@@ -1,34 +1,66 @@
 # Open Tasks
 
-## Urgent (Security)
+This list keeps only tasks that are worth tracking now.
 
-- Revoke GitHub token in `.env` immediately at GitHub → Settings → Personal access tokens. Not committed to git, but must be rotated as a precaution.
-- Delete or replace `.env` with a comment-only template after revoking.
+## Urgent
 
-## High Priority
+- Revoke the GitHub token that was found in local `.env`.
 
-- Remove dead backwards-compat aliases from `audit-core.js`: `qualityPenalties`, `qualityChecks`, `qualityPenaltyTotal`. Clean up matching fallback reads in `app.js` lines 588–627.
-- Make `loadDataFileIfEmpty()` return a `changed` flag so `initApp()` does not call `saveState()` on every page load when nothing changed.
-- When splitting `app.js`: group the 16 top-level `let` variables into a single state object.
-- When splitting `app.js`: convert to ES modules (`type="module"`) to replace `window` globals.
-- Add IndexedDB migration plan for larger prompt libraries.
-- Add better persistent storage plan for larger prompt libraries.
-- Add Git sync plan or command workflow.
+Reason:
 
-## Medium Priority
+- It was not committed, but it was exposed to a local review note before being redacted.
+- This must be done in GitHub by the token owner.
 
-- Add more LLM Wiki examples.
-- Add more safety audit rules.
+## Necessary Next
+
+- Create an IndexedDB migration plan for larger prompt libraries.
+- Keep JSON export/import as the human-readable backup path.
+- Decide how `localStorage` data will migrate without losing current prompts.
+
+Reason:
+
+- Current `localStorage` is fine for small use.
+- Larger prompt libraries need safer browser storage.
+- Planning first lowers the risk of data loss.
+
+## Useful After Storage
+
+- Move audit rules into a configurable data file.
+- Add more audit rules only after the current rule structure is configurable.
 - Improve mobile editor workflow.
-- Move safety audit rules into configurable data instead of hardcoded regex rules.
-- Add optional online sync plan that is safe for a public repository.
-- Create a simple centralized state update pattern to reduce direct global mutation.
 
-## Low Priority
+Reason:
 
-- Add theme options.
+- Audit rules will change over time.
+- Mobile editing is useful, but desktop/local use is already good enough for now.
+
+## Optional Later
+
+- Add Git sync or online sync.
 - Add keyboard shortcuts.
-- Add prompt favorite/star feature.
-- Add build/lint/test tooling when the app starts to grow beyond static files.
-- Add bulk actions for export, category move, and cleanup.
-- Split `app.js` into smaller modules later, when the user wants it or the file becomes harder to maintain.
+- Add favorite/star prompts.
+- Add bulk actions.
+- Add theme options.
+- Add build/lint tooling.
+
+Reason:
+
+- These are useful, but not required for the current local-first version.
+
+## Deferred
+
+- Split `app.js` into smaller modules.
+- Convert scripts to ES modules.
+- Group top-level mutable state into one state object.
+
+Reason:
+
+- These are engineering cleanup tasks.
+- The user decided they are not necessary right now.
+- Revisit when the app grows or becomes hard to maintain.
+
+## Removed From Active Tasks
+
+- Remove old audit `quality*` aliases: done.
+- Stop unchanged startup `localStorage` writes: done.
+- Replace native alerts/confirms with in-app UI: done.

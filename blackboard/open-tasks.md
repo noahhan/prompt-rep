@@ -1,58 +1,51 @@
 # UX/UI Review for Prompt Vault
 
-Date: 2026-05-31
-
-Reviewer: Gemini CLI perspective, updated after UI changes.
+Date: 2026-06-02
 
 ## Current Impression
 
-Prompt Vault now feels more focused and less crowded.
+Prompt Vault is now focused and usable.
 
 Strong points:
 
 - Overview gives a clear all-prompts card view.
 - Categories work as the main left-side navigation.
-- The editor has more space because the duplicate Prompts area was removed.
+- The editor has broad space.
 - Markdown and Preview tabs make prompt reading easier.
-- Audit is available when needed, but it does not permanently consume screen space.
-- The interface is cleaner after reducing icons, boxes, and heavy rounded controls.
+- Audit is available as a tab, not a permanent large panel.
+- Import/export and unsaved-change messages use in-app UI.
 
-## Completed UX Improvements
+## UX Tasks That Are Still Necessary
 
-- Removed the old middle Prompts list.
-- Added Overview card view.
-- Made category rows expandable by click.
-- Removed separate `>` expand buttons.
-- Removed category row delete icons.
-- Added empty-category state with safe remove action.
-- Removed redundant audit status text.
-- Added Audit as a tab.
-- Added Markdown and Preview tabs.
-- Matched Markdown and Preview panel heights.
-- Simplified editor tab and icon placement.
-- Removed Overview icon and styled Overview like the Categories title level.
-- Reduced heavy button styling for Save and Refresh.
+- Improve mobile editor workflow.
 
-## Still Worth Improving
+Reason:
 
-High value:
+- Desktop/local use is already strong.
+- Mobile can still feel long because navigation, editor, preview, audit, and history stack.
 
-- Improve mobile editing flow.
-- Plan IndexedDB storage for larger prompt libraries.
-- Add keyboard shortcuts for Save, New prompt, Search, and Preview.
-- Add favorites or pinned prompts.
+## UX Tasks That Are Optional
 
-Medium value:
+- Add keyboard shortcuts.
+- Add favorite/star prompts.
+- Add bulk actions.
+- Add compact or comfortable density options.
+- Add theme options.
 
-- Add bulk actions for export, category move, and cleanup.
-- Add compact and comfortable density options.
-- Add a clear settings area for storage, import/export, and future sync.
-- Add configurable audit rules.
+Reason:
 
-Low value:
+- These may improve comfort, but they are not required for the current version.
 
-- Add theme options after the core workflow is stable.
-- Add drag-and-drop later, only if users need it.
+## UX Tasks Removed From Active Roadmap
+
+- More decorative styling.
+- Drag-and-drop category or prompt ordering.
+- A separate prompt guide panel.
+
+Reason:
+
+- The current design direction is clean and practical.
+- Useful prompt guidance now lives in starter prompts and the LLM Wiki.
 
 ## UX Principle
 
