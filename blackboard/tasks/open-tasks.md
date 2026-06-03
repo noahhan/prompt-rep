@@ -13,13 +13,13 @@ Reason:
 
 ## Necessary Next
 
-- Test the IndexedDB migration with real browser data.
 - Keep JSON export/import as the human-readable backup path.
+- Decide whether to add more audit rules.
 
 Reason:
 
 - IndexedDB is now implemented.
-- Real browser testing is still useful because it protects existing saved prompts.
+- Controlled browser migration testing passed.
 - JSON export/import is still the clearest user backup path.
 
 ## Useful After Storage
@@ -63,3 +63,4 @@ Reason:
 - Stop unchanged startup `localStorage` writes: done.
 - Replace native alerts/confirms with in-app UI: done.
 - Move audit rules into a configurable data file: done.
+- Test IndexedDB migration with legacy localStorage data: done.

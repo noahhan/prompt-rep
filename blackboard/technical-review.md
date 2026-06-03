@@ -243,8 +243,8 @@ Add build tooling only if one of these becomes true:
 Current necessary tasks:
 
 1. Keep JSON export/import as the backup path.
-2. Test IndexedDB migration with real user browser data.
-3. Decide whether to add more audit rules.
+2. Decide whether to add more audit rules.
+3. Improve mobile editor workflow if mobile use becomes important.
 
 ### Deferred Tasks
 
@@ -258,10 +258,10 @@ These are useful, but not necessary now:
 
 ### Recommended Next Step
 
-Test IndexedDB migration with real user browser data.
+Decide whether to add more audit rules.
 
 Reason:
 
-- It protects existing saved prompts.
-- It confirms the storage migration works outside the test browser.
-- It is the clearest remaining necessary task.
+- The audit rule structure is now configurable.
+- Adding rule data is low risk.
+- It can improve user trust in the Audit tab.

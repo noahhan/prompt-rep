@@ -53,3 +53,5 @@
 - Added `data/audit-rules.json`.
 - Loaded configurable audit risk rules on app start with built-in fallback rules.
 - Added tests for configured audit rules and malformed rule filtering.
+- Ran controlled browser migration test from legacy `localStorage` into IndexedDB.
+- Verified migrated prompt, category, history, migration metadata, and local fallback copy.

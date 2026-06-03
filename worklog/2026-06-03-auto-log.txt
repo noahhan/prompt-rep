@@ -13,3 +13,6 @@ Refreshed blackboard/technical-review.md so it reflects IndexedDB storage, curre
 [2026-06-03T16:39:05.308Z] DONE - Configure audit rules
 Moved audit risk rules into data/audit-rules.json, added validation and fallback rules in audit-core.js, loaded configured rules on app start, and verified the Audit tab uses the configured rules.
 
+[2026-06-03T16:43:27.937Z] DONE - Test IndexedDB migration
+Ran a controlled browser migration from legacy localStorage data to IndexedDB. Verified prompt, category, history, migration metadata, local fallback copy, storage status, and migration notice.
+
