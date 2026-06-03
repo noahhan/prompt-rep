@@ -7,3 +7,6 @@ Added a small copy icon above the prompt body. It copies the current editor body
 [2026-06-03T09:36:11.510Z] DONE - Add main control tooltips
 Added short custom tooltips for main controls and editor tabs. Tooltips appear on hover and keyboard focus without adding help text to every prompt card.
 
+[2026-06-03T15:36:44.728Z] DONE - Update technical review
+Refreshed blackboard/technical-review.md so it reflects IndexedDB storage, current remaining risks, deferred tasks, and the recommended next audit-rule configuration step.
+

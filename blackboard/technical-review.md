@@ -1,94 +1,267 @@
 ## Technical Review: Prompt Vault (Structural Perspective)
 
-**Date:** 2026-05-31
+**Original review date:** 2026-05-31
 
-**Reviewer:** Gemini CLI (as Professional Software Engineer)
+**Updated:** 2026-06-04
 
-### Current Status Update
+**Reviewer:** Gemini CLI, reviewed against current project state
 
-The app is now stronger as a local-first prototype:
+### Current Status
 
-- Read-only renders no longer write to `localStorage`.
+Prompt Vault is now a stronger local-first app.
+
+Completed improvements:
+
+- Read-only renders no longer write to storage.
 - Import has duplicate protection.
 - Markdown import is safer.
 - New prompts are draft-first.
-- The UI is cleaner, with Overview, expandable Categories, editor tabs, Preview, Audit, and History.
+- The UI has Overview, expandable Categories, editor tabs, Preview, Audit, History, tooltips, and prompt body copy.
 - The app includes a 17-prompt starter library.
-- Import/export and unsaved-change flows now use in-app UI instead of browser-native dialogs.
+- Import/export and unsaved-change flows use in-app UI instead of browser-native dialogs.
 - Deprecated audit `quality*` aliases were removed.
-- Startup no longer writes unchanged existing state back to `localStorage`.
+- Startup no longer writes unchanged existing state.
+- IndexedDB is now the main local storage.
+- Existing `localStorage` prompts migrate into IndexedDB on load.
+- `localStorage` remains only as a fallback for this version.
 
-The structural risks below still matter for future growth.
-The `app.js` module split is intentionally deferred for now.
+### Overall Assessment
 
-### Overall Assessment: Solid Local Prototype with Architectural Debt for Future Growth
+Prompt Vault is a usable local-first prompt repository.
 
-The "Prompt Vault" is a functional client-side application built with vanilla JavaScript, demonstrating a clear understanding of its core domain. For its current scope (a small, single-page, local-storage-backed utility), it works. However, from a professional software engineering perspective, its current structure introduces several critical points that will lead to significant problems in terms of maintainability, scalability, performance, and robustness if the project were to grow in complexity or user base.
+The largest previous storage risk is now mostly resolved by `storage-core.js`.
 
-### Critical Points & Future Problems:
+The remaining risks are mainly maintainability risks:
+
+- `app.js` is still large.
+- UI rendering and application state are still tightly coupled.
+- Audit rules are still hardcoded.
+- There is no build or module system.
+
+These are real risks for future growth, but they are not all urgent for the current local-first version.
+
+### Current Risk Review
 
 #### 1. Global Mutable State Management
-*   **Observation:** The entire application state (`state` object) is a global mutable variable, loaded and saved synchronously to `localStorage`. All functions directly read from and write to this global `state`.
-*   **Future Problems:**
-    *   **Debugging Nightmares:** Tracking down the source of state changes becomes extremely difficult as the application grows. Unexpected behavior, race conditions, and inconsistent UI states are highly probable.
-    *   **Lack of Predictability:** Without a centralized, controlled state update mechanism (e.g., reducers, actions), the application's behavior is hard to predict and reason about.
-    *   **Testing Complexity:** Unit testing individual functions or UI components in isolation is nearly impossible due to their tight coupling with the global `state`.
-    *   **Performance Bottlenecks:** The app still re-renders broad UI areas on many state changes. This is acceptable now, but it can degrade with more data or complex views.
 
-#### 2. Excessive Direct DOM Manipulation
-*   **Observation:** The `render()` function and various event handlers directly manipulate innerHTML and CSS classes of DOM elements using `document.querySelector` and `els` references.
-*   **Future Problems:**
-    *   **Maintainability & Readability:** UI logic is deeply intertwined with application logic, making both harder to understand, modify, and extend. HTML structure changes often necessitate JavaScript changes.
-    *   **Bug Proneness:** Easy to introduce subtle bugs where DOM elements are not correctly updated or where existing event listeners are not properly re-attached after re-rendering `innerHTML`.
-    *   **Lack of Component Abstraction:** The absence of a component-based architecture (common in modern web development) prevents UI elements from being easily reusable, testable, or developed in isolation.
+**Status:** Still true.
 
-#### 3. `localStorage` as the Primary Database
-*   **Observation:** `localStorage` is used to persist the entire application `state` by serializing it to JSON.
-*   **Future Problems:**
-    *   **Scalability Limits:** `localStorage` typically has a 5-10MB storage limit. If users store many prompts, or very long prompts, this limit will be hit, causing the application to fail.
-    *   **Performance Degradation:** Synchronous `localStorage` operations (reading/writing the entire state on every save) block the main thread, leading to UI freezes, especially with larger data sets.
-    *   **Data Integrity & Querying:** `localStorage` offers no transaction support, indexing, or efficient querying mechanisms. Data corruption is a risk, and complex searches or aggregations (beyond current filtering) would be very inefficient.
-    *   **Data Structure Evolution:** While a `STORAGE_KEY` versioning (`prompt-vault:v1`) is present, managing complex schema migrations without a dedicated database migration strategy will become cumbersome and error-prone.
+**Observation:**
 
-#### 4. Monolithic `app.js` Structure
-*   **Observation:** The entire application logic resides within a single `app.js` file, with functions and variables declared globally or within a very flat scope.
-*   **Current decision:** Keep this as a known risk, but do not fix it immediately.
-*   **Future Problems:**
-    *   **Code Organization & Navigability:** Hard to quickly find relevant code sections in a large file.
-    *   **Increased Coupling:** Tight coupling between disparate parts of the application makes changes risky and increases the chance of unintended side effects.
-    *   **Reduced Reusability:** Functions are not easily extractable or reusable in other contexts due to implicit dependencies on global state and DOM `els`.
-    *   **Name Collisions:** Higher risk of accidental variable or function name collisions if more developers contribute or if third-party libraries are integrated.
+The app still keeps the main application state in global mutable variables in `app.js`.
 
-#### 5. Limited and Manual Error Handling
-*   **Observation:** Error handling is improved in key flows and now uses local UI messages instead of native dialogs for import/export and unsaved edits. Some lower-level error handling is still basic.
-*   **Future Problems:**
-    *   **Poor User Experience:** `alert()` dialogs are disruptive and unhelpful for a modern application.
-    *   **Lack of Robustness:** The application might fail silently or crash without informative feedback or proper recovery mechanisms for various edge cases (e.g., malformed data, network issues if extended).
-    *   **Difficult Debugging:** Insufficient logging or centralized error reporting makes it hard to diagnose issues in production environments.
+Examples:
+
+- `state`
+- `selectedId`
+- `selectedCategory`
+- `activeEditorTab`
+- `workspaceView`
+
+**Risk:**
+
+This is acceptable for the current app size, but it will become harder to debug as the app grows.
+
+**Recommendation:**
+
+Defer a full state-management rewrite.
+
+When the app grows, introduce a small local store with clear update functions before adding bigger features.
+
+#### 2. Broad Direct DOM Rendering
+
+**Status:** Still true.
+
+**Observation:**
+
+`render()` still updates many UI areas together:
+
+- categories
+- tags
+- overview
+- editor
+- tabs
+- icons
+
+Several render functions also write HTML through `innerHTML`.
+
+**Risk:**
+
+This can make future UI changes more fragile.
+
+**Recommendation:**
+
+Do not rewrite the full UI now.
+
+If a future feature touches one area heavily, extract that area first. Good first candidates:
+
+- overview rendering
+- category rendering
+- editor rendering
+
+#### 3. Browser Storage
+
+**Status:** Mostly resolved.
+
+**Original issue:**
+
+The app used `localStorage` as the main database.
+
+**Current state:**
+
+The app now uses IndexedDB as the main local store.
+
+`localStorage` is still written as a fallback for this version.
+
+**Remaining risk:**
+
+The app still writes the whole prompt state on save.
+
+This is acceptable for now, but very large prompt libraries may need per-prompt writes later.
+
+**Recommendation:**
+
+Keep current storage.
+
+Next storage improvement, only if needed:
+
+- write one changed prompt instead of rewriting all prompts
+- add a manual backup reminder
+- keep JSON export as the human-readable recovery path
+
+#### 4. Monolithic `app.js`
+
+**Status:** Still true, intentionally deferred.
+
+**Observation:**
+
+`app.js` remains the largest and most coupled file.
+
+Some logic has already been moved out:
+
+- `audit-core.js`
+- `import-core.js`
+- `storage-core.js`
+
+**Risk:**
+
+More features will make `app.js` harder to navigate.
+
+**Recommendation:**
+
+Do not split `app.js` only for style.
+
+Split only when a concrete feature needs it.
+
+Practical next split:
+
+- move audit rules/config out first
+- then consider `render-categories.js`, `render-overview.js`, or `editor-actions.js`
+
+#### 5. Error Handling
+
+**Status:** Improved, but not complete.
+
+**Observation:**
+
+Many important flows now use `showNotice()` and modals.
+
+Examples:
+
+- import errors
+- export warnings
+- storage warnings
+- copy errors
+- unsaved changes
+- delete confirmation
+
+**Remaining risk:**
+
+There is no central error logger.
+
+Some lower-level failures still only show a short message.
+
+**Recommendation:**
+
+Keep the current approach for local-first use.
+
+If online sync is added, add clearer error states and retry messages.
 
 #### 6. Hardcoded Audit Rules
-*   **Observation:** The `auditPrompt` function contains hardcoded regex patterns and associated weights.
-*   **Future Problems:**
-    *   **Inflexibility:** Updating or extending audit rules requires direct code modification and redeployment.
-    *   **Lack of User Customization:** Users cannot define or adjust their own safety rules, limiting the feature's utility for diverse needs.
 
-#### 7. Absence of a Build System and Modern Module System
-*   **Observation:** The project uses vanilla JavaScript without a module bundler (like Webpack, Rollup, Parcel) or modern ES module imports/exports.
-*   **Future Problems:**
-    *   **Dependency Management:** Managing external libraries and their versions manually becomes impractical for complex projects.
-    *   **Performance Optimization:** Lacks automated minification, tree-shaking, and code splitting, leading to larger download sizes and slower load times as the codebase grows.
-    *   **Development Experience:** Misses out on benefits like hot module replacement, automated linting, and transpilation for broader browser compatibility.
+**Status:** Still true.
 
-### Recommendations for Future Development:
+**Observation:**
 
-To address these critical points and prepare the Prompt Vault for future growth and professional development, I recommend considering:
+Audit rules are still hardcoded in `audit-core.js`.
 
-*   **Modern JavaScript Framework:** Adopt a framework like React, Vue, or Svelte to introduce component-based architecture, reactive state management, and a clearer separation of concerns.
-*   **Centralized State Management:** Implement a pattern (e.g., Redux, Vuex, Pinia, or even a simple custom store with immutable updates) to manage application state predictably.
-*   **Robust Data Persistence:** Explore alternative client-side storage solutions like IndexedDB (for larger, structured data with querying capabilities) or consider a backend API if data needs to be synchronized across devices or shared.
-*   **Modular Codebase:** Break down `app.js` into smaller, focused modules/files for better organization, reusability, and easier testing.
-*   **Comprehensive Error Handling:** Implement more graceful error displays (e.g., toast notifications, dedicated error boundaries) and centralized error logging.
-*   **Configurable Features:** Externalize configurations for features like audit rules to make them easier to manage and update.
-*   **Build System:** Introduce a modern build system to handle module bundling, optimization, and development tooling.
+**Risk:**
 
-By addressing these architectural foundations, the Prompt Vault can evolve from a robust prototype into a highly maintainable, scalable, and performant application.
+Changing audit logic requires code changes.
+
+Users cannot tune rules for their own workflow.
+
+**Recommendation:**
+
+This is the best next engineering task.
+
+Move audit rule data into a small config file, for example:
+
+- `data/audit-rules.json`
+
+Keep the scoring code in `audit-core.js`.
+
+This gives better maintainability without a large refactor.
+
+#### 7. Build System and Module System
+
+**Status:** Still deferred.
+
+**Observation:**
+
+The app is still plain HTML, CSS, and JavaScript loaded by script tags.
+
+**Risk:**
+
+This limits dependency management and build-time checks.
+
+**Recommendation:**
+
+Do not add a build system yet.
+
+The current static app is easy to run offline.
+
+Add build tooling only if one of these becomes true:
+
+- the app needs more third-party libraries
+- modules become hard to manage through script tags
+- automated bundling/minification becomes important
+- online deployment requires a build step
+
+### Necessary Tasks
+
+Current necessary tasks:
+
+1. Keep JSON export/import as the backup path.
+2. Move audit rules into a configurable data file.
+3. Test IndexedDB migration with real user browser data.
+
+### Deferred Tasks
+
+These are useful, but not necessary now:
+
+- Split `app.js`.
+- Add a frontend framework.
+- Add a build system.
+- Add online sync.
+- Add advanced state management.
+
+### Recommended Next Step
+
+Implement configurable audit rules.
+
+Reason:
+
+- It directly addresses a current technical risk.
+- It is small enough to do safely.
+- It improves the Audit tab without changing the whole app architecture.
