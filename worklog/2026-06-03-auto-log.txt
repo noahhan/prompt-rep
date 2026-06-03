@@ -1,3 +1,6 @@
 [2026-06-03T01:36:14.479Z] DONE - Implement IndexedDB storage
 Added storage-core.js, migrated existing browser prompts from localStorage to IndexedDB on load, kept localStorage fallback, added storage tests, updated docs and blackboard.
 
+[2026-06-03T07:09:32.388Z] DONE - Add prompt body copy button
+Added a small copy icon above the prompt body. It copies the current editor body, including unsaved edits, and shows an in-app success notice.
+

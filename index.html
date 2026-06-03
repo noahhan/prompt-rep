@@ -160,9 +160,14 @@
                 <section class="prompt-body-panel" aria-label="Prompt body">
                   <div class="prompt-body-head">
                     <label for="bodyInput">Prompt body</label>
-                    <div class="body-view-tabs" role="tablist" aria-label="Prompt body view">
-                      <button id="bodyMarkdownTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="bodyMarkdownPanel" data-body-view="markdown">Markdown</button>
-                      <button id="bodyPreviewTab" type="button" role="tab" aria-selected="false" aria-controls="bodyPreviewPanel" data-body-view="preview">Preview</button>
+                    <div class="body-head-actions">
+                      <button id="copyBodyButton" class="body-copy-button" type="button" title="Copy prompt body" aria-label="Copy prompt body">
+                        <span data-icon="copy"></span>
+                      </button>
+                      <div class="body-view-tabs" role="tablist" aria-label="Prompt body view">
+                        <button id="bodyMarkdownTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="bodyMarkdownPanel" data-body-view="markdown">Markdown</button>
+                        <button id="bodyPreviewTab" type="button" role="tab" aria-selected="false" aria-controls="bodyPreviewPanel" data-body-view="preview">Preview</button>
+                      </div>
                     </div>
                   </div>
                   <div id="bodyMarkdownPanel" class="body-view-panel" role="tabpanel" aria-labelledby="bodyMarkdownTab">

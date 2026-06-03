@@ -946,6 +946,31 @@ label {
   font-weight: 700;
 }
 
+.body-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.body-copy-button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.body-copy-button:hover {
+  color: var(--text);
+}
+
+.body-copy-button svg {
+  width: 16px;
+  height: 16px;
+}
+
 .body-view-tabs {
   display: inline-flex;
   align-items: center;

@@ -38,6 +38,7 @@ const els = {
   tagsInput: document.querySelector("#tagsInput"),
   summaryInput: document.querySelector("#summaryInput"),
   bodyInput: document.querySelector("#bodyInput"),
+  copyBodyButton: document.querySelector("#copyBodyButton"),
   bodyViewButtons: document.querySelectorAll("[data-body-view]"),
   bodyMarkdownPanel: document.querySelector("#bodyMarkdownPanel"),
   bodyPreviewPanel: document.querySelector("#bodyPreviewPanel"),
@@ -974,6 +975,22 @@ function downloadFile(filename, content, type) {
   URL.revokeObjectURL(url);
 }
 
+async function copyPromptBody() {
+  const body = els.bodyInput.value;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(body);
+    } else {
+      els.bodyInput.focus();
+      els.bodyInput.select();
+      document.execCommand("copy");
+    }
+    showNotice("Prompt copied.", "success");
+  } catch (error) {
+    showNotice(`Copy failed: ${error.message}`, "warn");
+  }
+}
+
 function importFile(file) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -1162,6 +1179,7 @@ els.searchInput.addEventListener("input", () => {
 });
 els.exportJsonButton.addEventListener("click", exportJson);
 els.exportMdButton.addEventListener("click", exportMarkdown);
+els.copyBodyButton.addEventListener("click", copyPromptBody);
 els.confirmImportButton.addEventListener("click", confirmImportPreview);
 els.cancelImportButton.addEventListener("click", closeImportPreview);
 els.cancelImportTextButton.addEventListener("click", closeImportPreview);
