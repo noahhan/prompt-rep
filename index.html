@@ -18,12 +18,12 @@
           </div>
         </div>
 
-        <button id="newPromptButton" class="button primary full" type="button">
+        <button id="newPromptButton" class="button primary full" type="button" data-tooltip="Create a new prompt." data-tooltip-position="right">
           <span data-icon="plus"></span>
           New prompt
         </button>
 
-        <button id="overviewButton" class="overview-link" type="button">
+        <button id="overviewButton" class="overview-link" type="button" data-tooltip="See all prompts as cards." data-tooltip-position="right">
           <span>Overview</span>
           <strong id="overviewCount">0</strong>
         </button>
@@ -31,7 +31,7 @@
         <section class="nav-section">
           <div class="section-head">
             <h2>Categories</h2>
-            <button id="addCategoryButton" class="icon-button" type="button" title="Add category" aria-label="Add category">
+            <button id="addCategoryButton" class="icon-button" type="button" aria-label="Add category" data-tooltip="Add a new category." data-tooltip-position="right">
               <span data-icon="plus"></span>
             </button>
           </div>
@@ -78,15 +78,15 @@
               <span data-icon="search"></span>
               <input id="searchInput" type="search" placeholder="Search prompts, tags, summaries..." />
             </label>
-            <button id="importButton" class="button ghost" type="button">
+            <button id="importButton" class="button ghost" type="button" data-tooltip="Add prompts from JSON or Markdown.">
               <span data-icon="upload"></span>
               Import
             </button>
-            <button id="exportJsonButton" class="button ghost" type="button">
+            <button id="exportJsonButton" class="button ghost" type="button" data-tooltip="Download full backup with history.">
               <span data-icon="download"></span>
               JSON
             </button>
-            <button id="exportMdButton" class="button ghost" type="button">
+            <button id="exportMdButton" class="button ghost" type="button" data-tooltip="Download readable Markdown export.">
               <span data-icon="file-text"></span>
               MD
             </button>
@@ -120,19 +120,19 @@
 
                 <div class="editor-control-row">
                   <div class="editor-tabs" role="tablist" aria-label="Prompt details">
-                    <button id="promptTabButton" class="active" type="button" role="tab" aria-selected="true" aria-controls="promptTabPanel" data-editor-tab="prompt">Prompt</button>
-                    <button id="auditTabButton" type="button" role="tab" aria-selected="false" aria-controls="auditTabPanel" data-editor-tab="audit">Audit</button>
-                    <button id="historyTabButton" type="button" role="tab" aria-selected="false" aria-controls="historyTabPanel" data-editor-tab="history">History</button>
+                    <button id="promptTabButton" class="active" type="button" role="tab" aria-selected="true" aria-controls="promptTabPanel" data-editor-tab="prompt" data-tooltip="Edit prompt content.">Prompt</button>
+                    <button id="auditTabButton" type="button" role="tab" aria-selected="false" aria-controls="auditTabPanel" data-editor-tab="audit" data-tooltip="Check safety and prompt quality.">Audit</button>
+                    <button id="historyTabButton" type="button" role="tab" aria-selected="false" aria-controls="historyTabPanel" data-editor-tab="history" data-tooltip="See and restore old versions.">History</button>
                   </div>
 
                   <div class="editor-actions">
-                    <button id="duplicateButton" class="icon-button" type="button" title="Duplicate prompt" aria-label="Duplicate prompt">
+                    <button id="duplicateButton" class="icon-button" type="button" aria-label="Duplicate prompt" data-tooltip="Make a copy of this prompt.">
                       <span data-icon="copy"></span>
                     </button>
-                    <button id="deleteButton" class="icon-button danger" type="button" title="Delete prompt" aria-label="Delete prompt">
+                    <button id="deleteButton" class="icon-button danger" type="button" aria-label="Delete prompt" data-tooltip="Delete this prompt.">
                       <span data-icon="x"></span>
                     </button>
-                    <button class="icon-button save-action" type="submit" title="Save prompt" aria-label="Save prompt">
+                    <button class="icon-button save-action" type="submit" aria-label="Save prompt" data-tooltip="Save current changes.">
                       <span data-icon="save"></span>
                     </button>
                   </div>
@@ -161,12 +161,12 @@
                   <div class="prompt-body-head">
                     <label for="bodyInput">Prompt body</label>
                     <div class="body-head-actions">
-                      <button id="copyBodyButton" class="body-copy-button" type="button" title="Copy prompt body" aria-label="Copy prompt body">
+                      <button id="copyBodyButton" class="body-copy-button" type="button" aria-label="Copy prompt body" data-tooltip="Copy current prompt body.">
                         <span data-icon="copy"></span>
                       </button>
                       <div class="body-view-tabs" role="tablist" aria-label="Prompt body view">
-                        <button id="bodyMarkdownTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="bodyMarkdownPanel" data-body-view="markdown">Markdown</button>
-                        <button id="bodyPreviewTab" type="button" role="tab" aria-selected="false" aria-controls="bodyPreviewPanel" data-body-view="preview">Preview</button>
+                        <button id="bodyMarkdownTab" class="active" type="button" role="tab" aria-selected="true" aria-controls="bodyMarkdownPanel" data-body-view="markdown" data-tooltip="Edit raw prompt text.">Markdown</button>
+                        <button id="bodyPreviewTab" type="button" role="tab" aria-selected="false" aria-controls="bodyPreviewPanel" data-body-view="preview" data-tooltip="Read rendered prompt.">Preview</button>
                       </div>
                     </div>
                   </div>
@@ -191,7 +191,7 @@
                 <div class="panel-head">
                   <h3>Safety audit</h3>
                   <div class="audit-actions">
-                    <button id="refreshAuditButton" class="icon-button" type="button" title="Refresh audit" aria-label="Refresh audit">
+                    <button id="refreshAuditButton" class="icon-button" type="button" aria-label="Refresh audit" data-tooltip="Refresh audit score.">
                       <span data-icon="refresh"></span>
                     </button>
                   </div>
@@ -210,7 +210,7 @@
                 <section class="history-panel">
                 <div class="panel-head">
                   <h3>Version history</h3>
-                  <button id="restoreButton" class="button compact" type="button" disabled>Restore</button>
+                  <button id="restoreButton" class="button compact" type="button" disabled data-tooltip="Restore selected version.">Restore</button>
                 </div>
                 <div id="historyList" class="history-list"></div>
               </section>

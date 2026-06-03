@@ -4,3 +4,6 @@ Added storage-core.js, migrated existing browser prompts from localStorage to In
 [2026-06-03T07:09:32.388Z] DONE - Add prompt body copy button
 Added a small copy icon above the prompt body. It copies the current editor body, including unsaved edits, and shows an in-app success notice.
 
+[2026-06-03T09:36:11.510Z] DONE - Add main control tooltips
+Added short custom tooltips for main controls and editor tabs. Tooltips appear on hover and keyboard focus without adding help text to every prompt card.
+
