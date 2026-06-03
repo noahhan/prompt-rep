@@ -35,7 +35,7 @@ The remaining risks are mainly maintainability risks:
 
 - `app.js` is still large.
 - UI rendering and application state are still tightly coupled.
-- Audit rules are still hardcoded.
+- Audit rule data is configurable, while scoring logic still lives in code.
 - There is no build or module system.
 
 These are real risks for future growth, but they are not all urgent for the current local-first version.
@@ -189,29 +189,29 @@ If online sync is added, add clearer error states and retry messages.
 
 #### 6. Hardcoded Audit Rules
 
-**Status:** Still true.
+**Status:** Mostly resolved.
 
 **Observation:**
 
-Audit rules are still hardcoded in `audit-core.js`.
+Audit risk rule data now lives in `data/audit-rules.json`.
+
+`audit-core.js` still owns validation, fallback rules, and score calculation.
 
 **Risk:**
 
-Changing audit logic requires code changes.
+Changing risk rule data no longer requires editing scoring code.
 
-Users cannot tune rules for their own workflow.
+Changing score calculation still requires code changes.
 
 **Recommendation:**
 
-This is the best next engineering task.
+Keep this structure for now.
 
-Move audit rule data into a small config file, for example:
+Future improvement, only if needed:
 
-- `data/audit-rules.json`
-
-Keep the scoring code in `audit-core.js`.
-
-This gives better maintainability without a large refactor.
+- add more risk rules to `data/audit-rules.json`
+- add a simple UI for custom user rules
+- make structure checks configurable too
 
 #### 7. Build System and Module System
 
@@ -243,8 +243,8 @@ Add build tooling only if one of these becomes true:
 Current necessary tasks:
 
 1. Keep JSON export/import as the backup path.
-2. Move audit rules into a configurable data file.
-3. Test IndexedDB migration with real user browser data.
+2. Test IndexedDB migration with real user browser data.
+3. Decide whether to add more audit rules.
 
 ### Deferred Tasks
 
@@ -258,10 +258,10 @@ These are useful, but not necessary now:
 
 ### Recommended Next Step
 
-Implement configurable audit rules.
+Test IndexedDB migration with real user browser data.
 
 Reason:
 
-- It directly addresses a current technical risk.
-- It is small enough to do safely.
-- It improves the Audit tab without changing the whole app architecture.
+- It protects existing saved prompts.
+- It confirms the storage migration works outside the test browser.
+- It is the clearest remaining necessary task.

@@ -1,5 +1,5 @@
 (function attachAuditCore(root) {
-  const auditRules = [
+  const defaultAuditRules = [
     {
       id: "R1",
       label: "Instruction bypass",
@@ -41,6 +41,32 @@
       message: "Mentions harmful cyber activity."
     }
   ];
+  const auditRules = [...defaultAuditRules];
+
+  function normalizeAuditRules(value) {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((rule) => ({
+        id: String(rule?.id || "").trim(),
+        label: String(rule?.label || "").trim(),
+        level: ["high", "medium", "low"].includes(rule?.level) ? rule.level : "medium",
+        weight: Number.isFinite(Number(rule?.weight)) ? Number(rule.weight) : 0,
+        pattern: String(rule?.pattern || "").trim(),
+        message: String(rule?.message || "").trim()
+      }))
+      .filter((rule) => rule.id && rule.label && rule.pattern && rule.message && rule.weight > 0);
+  }
+
+  function setAuditRules(rules) {
+    const normalized = normalizeAuditRules(rules);
+    if (!normalized.length) return false;
+    auditRules.splice(0, auditRules.length, ...normalized);
+    return true;
+  }
+
+  function resetAuditRules() {
+    auditRules.splice(0, auditRules.length, ...defaultAuditRules);
+  }
 
   function getPlaceholders(body) {
     return [...new Set((String(body || "").match(/\{[a-zA-Z0-9_.-]+\}/g) || []).map((item) => item.slice(1, -1)))];
@@ -152,7 +178,11 @@
   }
 
   root.PromptVaultAudit = {
+    defaultAuditRules,
     auditRules,
+    normalizeAuditRules,
+    setAuditRules,
+    resetAuditRules,
     auditPrompt,
     getPlaceholders
   };

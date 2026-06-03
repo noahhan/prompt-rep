@@ -74,3 +74,47 @@ test("audit core exposes concise factor indexes", async () => {
   assert.deepEqual(Array.from(result.structureChecks).map((check) => check.id), ["S1", "S2", "S3", "S4"]);
   assert.equal(result.breakdown.structurePenaltyTotal, 0);
 });
+
+test("audit core can replace risk rules from config data", async () => {
+  const audit = await loadAuditCore();
+
+  audit.setAuditRules([
+    {
+      id: "C1",
+      label: "Custom risk",
+      level: "high",
+      weight: 40,
+      pattern: "custom-risk-word",
+      message: "Custom configured risk matched."
+    }
+  ]);
+
+  const result = audit.auditPrompt({
+    title: "Configured audit",
+    summary: "This prompt has enough summary context for the audit.",
+    body: "Return Markdown sections about custom-risk-word for {topic}."
+  });
+
+  assert.deepEqual(Array.from(audit.auditRules).map((rule) => rule.id), ["C1"]);
+  assert.deepEqual(Array.from(result.riskChecks).map((check) => check.id), ["C1"]);
+  assert.equal(result.findings.some((finding) => finding.id === "C1"), true);
+  assert.equal(result.score, 60);
+});
+
+test("audit core ignores malformed configured rules", async () => {
+  const audit = await loadAuditCore();
+
+  audit.setAuditRules([
+    { id: "BAD", label: "Missing pattern" },
+    {
+      id: "OK",
+      label: "Valid rule",
+      level: "medium",
+      weight: 10,
+      pattern: "valid-risk",
+      message: "Valid risk matched."
+    }
+  ]);
+
+  assert.deepEqual(Array.from(audit.auditRules).map((rule) => rule.id), ["OK"]);
+});

@@ -16,6 +16,7 @@ It helps users save, edit, organize, audit, preview, import, and export prompts.
 - Read prompt body in Preview mode.
 - Run safety audit from the Audit tab.
 - See safety score, risk factors, quality factors, checks, suggestions, placeholders, and export warning.
+- Configure audit risk rules from `data/audit-rules.json`.
 - Keep version history for each prompt.
 - Import and export JSON or Markdown.
 - Use 17 starter prompts based on the prompt-engineering research folder.
@@ -65,6 +66,7 @@ Existing local users receive the starter prompts once through a merge step. This
 - IndexedDB is the main local store. localStorage is kept as a fallback for this version.
 - JSON exports preserve history. Markdown exports are portable summaries of the current prompts.
 - When served locally, the app can load starter prompts from `data/prompts.json`.
+- Audit risk rules are stored in `data/audit-rules.json`.
 - Template metadata is stored in `data/templates.json`.
 - For Git sync later, export JSON and replace `data/prompts.json` with the exported prompt data.
 

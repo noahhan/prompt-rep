@@ -1,0 +1,42 @@
+[
+  {
+    "id": "R1",
+    "label": "Instruction bypass",
+    "level": "high",
+    "weight": 35,
+    "pattern": "(ignore|bypass|override).{0,30}(system|instruction|policy|guardrail)",
+    "message": "May ask to bypass instructions or policy."
+  },
+  {
+    "id": "R2",
+    "label": "Secret exposure",
+    "level": "high",
+    "weight": 30,
+    "pattern": "((password|api key|secret|token|credential).{0,30}(print|show|extract|reveal|return)|(print|show|extract|reveal|return).{0,30}(password|api key|secret|token|credential))",
+    "message": "May ask to reveal secrets or credentials."
+  },
+  {
+    "id": "R3",
+    "label": "Personal data",
+    "level": "medium",
+    "weight": 18,
+    "pattern": "(personal data|ssn|passport|credit card|medical record|private)",
+    "message": "Mentions sensitive personal data."
+  },
+  {
+    "id": "R4",
+    "label": "Destructive action",
+    "level": "medium",
+    "weight": 15,
+    "pattern": "(delete|drop|wipe|destroy|reset).{0,30}(database|file|record|table)",
+    "message": "Contains destructive operation wording."
+  },
+  {
+    "id": "R5",
+    "label": "Cyber abuse",
+    "level": "medium",
+    "weight": 12,
+    "pattern": "(malware|phishing|exploit|keylogger|ransomware)",
+    "message": "Mentions harmful cyber activity."
+  }
+]

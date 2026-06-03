@@ -10,3 +10,6 @@ Added short custom tooltips for main controls and editor tabs. Tooltips appear o
 [2026-06-03T15:36:44.728Z] DONE - Update technical review
 Refreshed blackboard/technical-review.md so it reflects IndexedDB storage, current remaining risks, deferred tasks, and the recommended next audit-rule configuration step.
 
+[2026-06-03T16:39:05.308Z] DONE - Configure audit rules
+Moved audit risk rules into data/audit-rules.json, added validation and fallback rules in audit-core.js, loaded configured rules on app start, and verified the Audit tab uses the configured rules.
+

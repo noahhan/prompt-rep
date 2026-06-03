@@ -50,3 +50,6 @@
 - Kept `localStorage` as a fallback for this version.
 - Added storage-core tests.
 - Updated storage status copy to show IndexedDB or local fallback.
+- Added `data/audit-rules.json`.
+- Loaded configurable audit risk rules on app start with built-in fallback rules.
+- Added tests for configured audit rules and malformed rule filtering.

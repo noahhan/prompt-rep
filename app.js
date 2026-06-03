@@ -194,6 +194,17 @@ function updateStorageStatus() {
   els.storageStatus.textContent = `${state.prompts.length} saved prompts · ${storageName}`;
 }
 
+async function loadAuditRulesFile() {
+  try {
+    const response = await fetch("./data/audit-rules.json", { cache: "no-store" });
+    if (!response.ok) return false;
+    const rules = await response.json();
+    return window.PromptVaultAudit.setAuditRules(rules);
+  } catch {
+    return false;
+  }
+}
+
 function normalizeTags(value) {
   return importCore.normalizeTags(value);
 }
@@ -1284,6 +1295,7 @@ document.addEventListener("click", (event) => {
 });
 
 async function initApp() {
+  await loadAuditRulesFile();
   storageSession = await storageCore.initStorage({
     fallbackState: makeSeedState(),
     storageKey: STORAGE_KEY,

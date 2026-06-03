@@ -24,13 +24,12 @@ Reason:
 
 ## Useful After Storage
 
-- Move audit rules into a configurable data file.
 - Add more audit rules only after the current rule structure is configurable.
 - Improve mobile editor workflow.
 
 Reason:
 
-- Audit rules will change over time.
+- Audit rules will change over time, and the current rule data is now configurable.
 - Mobile editing is useful, but desktop/local use is already good enough for now.
 
 ## Optional Later
@@ -63,3 +62,4 @@ Reason:
 - Remove old audit `quality*` aliases: done.
 - Stop unchanged startup `localStorage` writes: done.
 - Replace native alerts/confirms with in-app UI: done.
+- Move audit rules into a configurable data file: done.
