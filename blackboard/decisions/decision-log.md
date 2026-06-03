@@ -132,3 +132,18 @@ Reason:
 - User data safety is more important than fast implementation.
 - Existing saved prompts must not be lost.
 - Offline-first behavior must remain.
+
+## 2026-06-03: Use IndexedDB as main local storage
+
+Decision:
+
+- Add `storage-core.js`.
+- Use IndexedDB as the main local storage.
+- Migrate existing `localStorage` prompts into IndexedDB on app load.
+- Keep `localStorage` fallback for one app version.
+
+Reason:
+
+- Larger prompt libraries need safer browser storage.
+- Existing local users must keep saved prompts.
+- The app must still work offline without a backend.

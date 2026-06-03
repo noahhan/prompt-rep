@@ -84,8 +84,9 @@ const els = {
 
 const { auditPrompt, getPlaceholders } = window.PromptVaultAudit;
 const importCore = window.PromptVaultImport;
+const storageCore = window.PromptVaultStorage;
 
-let state = loadState() || makeSeedState();
+let state = makeSeedState();
 let selectedId = state.prompts[0]?.id || null;
 let selectedCategory = state.prompts[0]?.category || state.categories[0] || null;
 let selectedTag = null;
@@ -100,6 +101,7 @@ let activeBodyView = "markdown";
 let workspaceView = "editor";
 let noticeTimer = null;
 let pendingDiscardAction = null;
+let storageSession = { backend: "localStorage", db: null };
 const expandedCategories = new Set([state.prompts[0]?.category].filter(Boolean));
 
 function makeSeedState() {
@@ -133,20 +135,6 @@ function makeSeedState() {
   };
 }
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return {
-      categories: Array.isArray(parsed.categories) ? parsed.categories : [],
-      prompts: Array.isArray(parsed.prompts) ? parsed.prompts : []
-    };
-  } catch {
-    return null;
-  }
-}
-
 async function loadDataFileIfEmpty() {
   try {
     const response = await fetch("./data/prompts.json", { cache: "no-store" });
@@ -154,10 +142,12 @@ async function loadDataFileIfEmpty() {
     const data = await response.json();
     const prompts = Array.isArray(data.prompts) ? data.prompts : [];
     if (!prompts.length) return false;
-    if (localStorage.getItem(STORAGE_KEY)) {
-      if (localStorage.getItem(STARTER_LIBRARY_KEY) === STARTER_LIBRARY_VERSION) return false;
+    if (storageSession.hasStoredData) {
+      const starterVersion = await storageCore.readStarterLibraryVersion(storageSession, STARTER_LIBRARY_KEY);
+      if (starterVersion === STARTER_LIBRARY_VERSION) return false;
       mergeStarterLibrary(data);
-      localStorage.setItem(STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
+      await storageCore.writeStarterLibraryVersion(storageSession, STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
+      storageSession.hasStoredData = true;
       return true;
     }
     state = {
@@ -166,7 +156,8 @@ async function loadDataFileIfEmpty() {
     };
     selectedId = state.prompts[0]?.id || null;
     selectedCategory = state.prompts[0]?.category || state.categories[0] || null;
-    localStorage.setItem(STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
+    await storageCore.writeStarterLibraryVersion(storageSession, STARTER_LIBRARY_KEY, STARTER_LIBRARY_VERSION);
+    storageSession.hasStoredData = true;
     return true;
   } catch {
     // Direct file opening cannot fetch local JSON. Seed data is used instead.
@@ -190,12 +181,16 @@ function mergeStarterLibrary(data) {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  storageCore.saveState(storageSession, state, STORAGE_KEY).catch((error) => {
+    showNotice(`Storage save failed: ${error.message}`, "warn");
+  });
+  storageSession.hasStoredData = true;
   updateStorageStatus();
 }
 
 function updateStorageStatus() {
-  els.storageStatus.textContent = `${state.prompts.length} saved prompts`;
+  const storageName = storageSession.backend === "indexeddb" ? "IndexedDB" : "Local fallback";
+  els.storageStatus.textContent = `${state.prompts.length} saved prompts · ${storageName}`;
 }
 
 function normalizeTags(value) {
@@ -1271,10 +1266,19 @@ document.addEventListener("click", (event) => {
 });
 
 async function initApp() {
-  const hadStoredState = Boolean(localStorage.getItem(STORAGE_KEY));
+  storageSession = await storageCore.initStorage({
+    fallbackState: makeSeedState(),
+    storageKey: STORAGE_KEY,
+    starterLibraryKey: STARTER_LIBRARY_KEY
+  });
+  state = storageSession.state;
+  selectedId = state.prompts[0]?.id || null;
+  selectedCategory = state.prompts[0]?.category || state.categories[0] || null;
   const changed = await loadDataFileIfEmpty();
-  if (changed || !hadStoredState) saveState();
+  if (changed || !storageSession.hasStoredData) saveState();
   render();
+  if (storageSession.migrated) showNotice("Local prompts migrated to IndexedDB. JSON export is still available for backup.", "success");
+  if (storageSession.warning) showNotice(`Using localStorage fallback: ${storageSession.warning}`, "warn");
 }
 
 initApp();

@@ -2,6 +2,8 @@
 
 Date: 2026-06-02
 
+Status: Implemented on 2026-06-03.
+
 ## Goal
 
 Move Prompt Vault from `localStorage` to IndexedDB without losing current user prompts.
@@ -155,21 +157,18 @@ If imported data is invalid:
 
 ## Implementation Steps
 
-1. Add `storage-core.js`.
-2. Add small IndexedDB wrapper:
+1. Add `storage-core.js`. Done.
+2. Add small IndexedDB wrapper. Done:
    - `openDatabase`
-   - `readAllPrompts`
-   - `writePrompt`
-   - `deletePrompt`
-   - `readCategories`
-   - `writeCategory`
+   - `readIndexedState`
+   - `writeIndexedState`
    - `readMetadata`
    - `writeMetadata`
-3. Add migration from `localStorage`.
-4. Keep current `state` shape in memory.
-5. Replace `loadState()` and `saveState()` internals only.
-6. Keep existing UI behavior unchanged.
-7. Add tests for migration helpers where possible.
+3. Add migration from `localStorage`. Done.
+4. Keep current `state` shape in memory. Done.
+5. Replace `loadState()` and `saveState()` internals only. Done.
+6. Keep existing UI behavior unchanged. Done.
+7. Add tests for migration helpers where possible. Done for normalization and local fallback.
 8. Run browser test:
    - first load with only `localStorage`
    - reload after migration

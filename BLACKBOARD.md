@@ -1,6 +1,6 @@
 # Prompt Vault Blackboard
 
-_Last updated: 2026-06-02_
+_Last updated: 2026-06-03_
 
 This file is the root summary for important project status.
 
@@ -36,6 +36,9 @@ The earlier critical issues were fixed on 2026-05-31:
 - Empty categories can be removed safely.
 - Import/export safety uses in-app notices.
 - Unsaved edit navigation uses an in-app modal instead of browser `confirm()`.
+- IndexedDB is now the main browser storage.
+- Existing `localStorage` prompts migrate into IndexedDB on load.
+- `localStorage` remains as fallback for this version.
 
 ## Current UI Decisions
 
@@ -71,9 +74,8 @@ Urgent:
 
 Necessary next:
 
-- `localStorage` is fine for now, but IndexedDB is better for larger libraries.
-- Data migration must protect existing saved prompts.
-- IndexedDB migration plan is in `blackboard/decisions/indexeddb-migration-plan.md`.
+- Keep JSON export/import as the human-readable backup path.
+- Watch the first IndexedDB migration release for real user data issues.
 
 Useful after storage:
 
@@ -84,10 +86,10 @@ Useful after storage:
 ## Next Good Steps
 
 1. Revoke the local GitHub token in GitHub settings.
-2. Review and approve the IndexedDB migration plan.
+2. Test the IndexedDB migration with the user's browser data.
 3. Keep JSON export/import as the backup path.
-4. Move audit rules into configurable data after storage planning.
-5. Improve mobile editor flow when core storage is stable.
+4. Move audit rules into configurable data.
+5. Improve mobile editor flow.
 
 Deferred:
 

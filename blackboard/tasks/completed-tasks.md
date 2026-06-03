@@ -42,3 +42,11 @@
 - Sanitized Claude review note so no token value is stored in blackboard.
 - Removed deprecated audit `quality*` aliases.
 - Stopped startup from writing unchanged existing state to `localStorage`.
+
+## 2026-06-03
+
+- Added IndexedDB storage through `storage-core.js`.
+- Migrated existing `localStorage` prompts into IndexedDB on app load.
+- Kept `localStorage` as a fallback for this version.
+- Added storage-core tests.
+- Updated storage status copy to show IndexedDB or local fallback.

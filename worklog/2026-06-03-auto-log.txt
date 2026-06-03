@@ -1,0 +1,3 @@
+[2026-06-03T01:36:14.479Z] DONE - Implement IndexedDB storage
+Added storage-core.js, migrated existing browser prompts from localStorage to IndexedDB on load, kept localStorage fallback, added storage tests, updated docs and blackboard.
+

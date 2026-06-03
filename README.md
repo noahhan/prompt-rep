@@ -19,6 +19,7 @@ It helps users save, edit, organize, audit, preview, import, and export prompts.
 - Keep version history for each prompt.
 - Import and export JSON or Markdown.
 - Use 17 starter prompts based on the prompt-engineering research folder.
+- Store prompts in IndexedDB with a localStorage fallback.
 - Run offline with no backend.
 
 ## Run
@@ -61,6 +62,7 @@ Existing local users receive the starter prompts once through a merge step. This
 
 - No network or backend is required.
 - Data stays in the current browser profile until exported or cleared.
+- IndexedDB is the main local store. localStorage is kept as a fallback for this version.
 - JSON exports preserve history. Markdown exports are portable summaries of the current prompts.
 - When served locally, the app can load starter prompts from `data/prompts.json`.
 - Template metadata is stored in `data/templates.json`.
